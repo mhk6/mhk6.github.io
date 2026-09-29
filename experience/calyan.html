@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calyan Technologies — Mohak Dua</title>
-  <meta name="description" content="Electrical engineering internship at Calyan Technologies, working on embedded medical-device hardware." />
+  <meta name="description" content="Electrical engineering internship at Calyan Technologies: firmware verification, bench measurement, circuit simulation, and test tools for cardiac device hardware." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -27,7 +27,23 @@
     <h1 style="view-transition-name:t-calyan">Calyan Technologies</h1>
     <p class="tech">Electrical Engineering Intern · May 2026 to August 2026</p>
 
-    <p>I worked across firmware, electronics, and testing on embedded medical-device hardware. I designed a <a href="../projects/usb-uart-programmer.html">USB-to-UART programmer</a> that became the team's standard flashing tool, and I ran more than 120 verification and validation steps on the system. I also used LTspice models checked against bench measurements to catch a power-chain problem before the board went to fab.</p>
+    <p>I spent the summer as an electrical engineering intern at Calyan Technologies, a local medical tech startup building cardiac devices. Most of my time went into verification testing, bench measurements, and circuit simulation on the device hardware, and I built a couple of tools for the team along the way.</p>
+
+    <h2>Firmware verification</h2>
+    <p>Most of July went into firmware verification. The team ran a formal 125-step system test protocol across the device's processors, and I ran more than 120 of those steps, several times over as new firmware builds and test units came in. That meant setting up the bench, driving the device through its operating modes, capturing the signals, and writing the results into the final test report. I also kept the running list of firmware issues we found and retested fixes on each new build, and I ported part of the team's Python test automation over to a new version of the hardware.</p>
+
+    <h2>Tools I built</h2>
+    <p>In June I built a multi-sensor data-acquisition rig for lab testing. It's an ESP32 reading three accelerometers over two I2C buses plus an analog sensor channel, with FreeRTOS tasks split across both cores and a pulse input for lining the data up with the device's output. I wrote the firmware and a Python tool that goes with it for live plotting, filtering, and logging, and the rig was used during a lab study.</p>
+    <p>I also designed a <a href="../projects/usb-uart-programmer.html">USB-to-UART programmer</a> that became the team's standard way to flash one of its ESP32-based systems, and I fixed bugs in the team's engineering app, the desktop app used to configure the device.</p>
+
+    <h2>Tracking down an output shortfall</h2>
+    <p>A teammate's verification test showed one of the device's outputs coming in under its target. I swept that output against load on the bench, which pointed to a small series resistance ahead of it, and then measured the feedback resistors directly and found they didn't match the values on the schematic. Putting those two together predicted the teammate's reading almost exactly, so it wasn't a programming problem, and the fix came down to a resistor change.</p>
+
+    <h2>Current draw measurements</h2>
+    <p>I measured the device's current draw across more than 250 operating configurations, covering different modes, output levels, and loads, using a Digilent Analog Discovery and a custom measurement script. Those numbers went into the device documentation. The measurements also caught firmware regressions, including a build where some modes drew around a hundred times more current than they should have, which I reproduced on multiple boards and traced back to its cause.</p>
+
+    <h2>Circuit simulation</h2>
+    <p>I built LTspice simulations of parts of the device's circuitry, checking the component models against datasheets and hand calculations first. On a board that was already in evaluation, the simulations turned up several design issues, which I documented with proposed fixes. I also helped write the electrical specification and design documents.</p>
 
   </article>
 
