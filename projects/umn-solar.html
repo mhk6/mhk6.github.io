@@ -27,18 +27,18 @@
     <h1 style="view-transition-name:t-solar">UMN Solar Vehicle, Power-Distribution Board</h1>
     <p class="tech">Altium · TPS54560 · power</p>
 
-    <p>A power board I designed for the University of Minnesota Solar Vehicle Project. It's fabbed, soldered, and running on this year's car.</p>
+    <p>A power-distribution board I designed in Altium for the University of Minnesota Solar Vehicle Project. I laid it out, reflow-soldered it, and it's running on this year's car.</p>
 
     <h2>What it needed to do</h2>
-    <p>The solar car's driver interface runs on a Raspberry Pi. The team moved it to a Pi HAT that needed 12 V and more current than the usual 5 V setup, so I designed a separate board just to handle that power cleanly and keep it apart from the rest of the electronics. A large connector links it to the battery and to the UI control board, which sends the enable signals.</p>
+    <p>The car's driver interface runs on a Raspberry Pi, and the team moved it to a Pi HAT that needs 12 V and more current than the usual 5 V setup. So I designed a separate board to handle that power cleanly and keep it apart from the rest of the electronics. A large connector links it to the battery and to the UI control board, which sends the enable signals.</p>
 
     <figure>
       <img src="../assets/img/solar-power-3d.png" alt="3D render of the solar vehicle power board in Altium." />
       <figcaption>3D render of the board in Altium.</figcaption>
     </figure>
 
-    <h2>Built around switching</h2>
-    <p>A high-side P-channel MOSFET works as a load switch, so the UI control board can turn 12 V to the Pi HAT on and off with a logic-level enable signal instead of cutting power somewhere messier. After that, a TPS54560 buck steps the 12 V down to a 5 V rail for the display, the Pi's other needs, and the USB port the driver might plug into. I picked the TPS54560 because it can easily handle the several amps the Pi, screen, and USB can pull together, and its wide input range works well on a noisy 12 V vehicle bus. On the input side there's fusing and transient protection, so a fault on the bus doesn't make it further into the system.</p>
+    <h2>Load switch and buck</h2>
+    <p>A high-side P-channel MOSFET works as a load switch, so the UI control board can turn the 12 V to the Pi HAT on and off with a logic-level enable signal. A TPS54560 buck then steps the 12 V down to a 5 V rail for the driver display and the USB-C and USB-A ports people use to charge their phones. I picked the TPS54560 because it easily handles the several amps the display and charging ports can pull together, and its wide input range holds up well on a noisy 12 V vehicle bus. On the input side there's fusing and transient protection, so a fault on the bus doesn't make it further into the system.</p>
 
     <figure>
       <img src="../assets/img/solar-power-layout.png" alt="Two-layer copper layout and routing of the solar power board." />
@@ -46,14 +46,12 @@
     </figure>
     <figure>
       <img src="../assets/img/solar-power-schematic.png" alt="Schematic of the solar power board: TPS54560 buck, FDS6675BZ high-side load switch, fusing and transient protection." />
-      <figcaption>Schematic: TPS54560 buck, FDS6675BZ high-side load switch, input fusing and protection.</figcaption>
+      <figcaption>Schematic with the TPS54560 buck, the FDS6675BZ high-side load switch, and input fusing and protection.</figcaption>
     </figure>
 
-    <p>I did the layout, released it, reflow-soldered it, and now it's running on this year's car.</p>
-
     <div class="pager">
-      <a href="pic24-display.html">&#8592; Wireless Motion-Controlled Display</a>
-      <a href="flight-controller.html">ELRS Flight Controller &#8594;</a>
+      <a href="flight-controller.html">&#8592; ELRS Flight Controller</a>
+      <a href="usb-uart-programmer.html">USB-to-UART Programmer &#8594;</a>
     </div>
   </article>
 

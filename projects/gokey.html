@@ -28,7 +28,7 @@
     <h1 style="view-transition-name:t-gokey">GoKey, a USB Security Key</h1>
     <p class="tech">Altium · STM32L4 · ATECC608B · USB-C</p>
 
-    <p>A USB-C hardware security key, along the lines of a FIDO key. The idea is simple: you plug it in, press the button to prove you're actually there, and you're logged in.</p>
+    <p>GoKey is a USB-C hardware security key, similar to a FIDO key. The idea is that you plug it in and press a button to prove you're physically there, instead of typing in a code from an app. I designed the board in Altium, released it for fabrication, and hand-assembled the first units.</p>
 
     <figure class="model3d">
       <model-viewer
@@ -51,23 +51,19 @@
         touch-action="pan-y">
         <span class="hint">drag to rotate · scroll to zoom</span>
       </model-viewer>
-      <figcaption>The actual board, exported from KiCad. You can drag it around.</figcaption>
+      <figcaption>Altium 3D model of the assembled board.</figcaption>
     </figure>
 
-    <h2>Why I built it</h2>
-    <p>I just think hardware security keys are cool. Instead of typing in 2FA codes from an app, you plug the key in and you're in. I wanted to make my own version of one.</p>
-
     <h2>Where the keys live</h2>
-    <p>The main idea is that the private keys never sit in the microcontroller's flash. They're kept in an ATECC608B secure element, a tamper-resistant chip made to generate and store ECC keys without ever giving them back out. Real security keys use the same kind of part, and I found it while I was researching how they work. It also seemed like a better thing to learn from than trying to build my own key storage on the STM32.</p>
+    <p>The main design decision was keeping the private keys out of the microcontroller's flash. They're stored in an ATECC608B secure element, a tamper-resistant chip that generates and stores ECC keys and never gives them back out. The STM32L4 handles USB and asks the secure element to sign things, but it never actually sees the keys. That's the same approach real security keys use, and it's a lot safer than keeping the keys in the STM32's flash.</p>
 
     <figure>
       <img src="../assets/img/gokey-assembled-clean.jpg" alt="The assembled GoKey board with USB-C, an STM32L4, a secure element, and USER and RST buttons." />
-      <figcaption>The first unit, which I hand-assembled from the Gerbers I released.</figcaption>
+      <figcaption>One of the first hand-assembled units.</figcaption>
     </figure>
 
-    <h2>Building the board</h2>
-    <p>The hardest part was the board itself. Everything had to fit on a small two-layer board about the size of a keyring, so the power and decoupling network took a lot of care. I also assembled it by hand, which is how I learned hot-air reflow on the STM32L4's QFN package and micro-soldering on the USB-C connector.</p>
-    <p>I took two things away from it. First, high-frequency decoupling caps need to be within about 1 to 3 mm of the pin, or they don't really do anything. Second, power and ground copper should be sized consistently. Current takes the lower-resistance path, so if the trace widths don't match you end up with uneven current and voltage drop.</p>
+    <h2>Layout and assembly</h2>
+    <p>Everything had to fit on a two-layer board about the size of a keyring, so most of the layout work went into the power and decoupling network. I assembled the first units by hand, using hot-air reflow for the STM32L4's QFN package and micro-soldering for the USB-C connector.</p>
 
     <figure>
       <img src="../assets/img/gokey-pcb.png" alt="The two-layer copper layout of the GoKey board in Altium." />
@@ -76,14 +72,12 @@
 
     <figure>
       <img src="../assets/img/gokey-schematic.png" alt="Full schematic of the GoKey board: STM32L432 microcontroller, ATECC608B secure element on I2C, USB-C with ESD protection, and an LDO." />
-      <figcaption>Full schematic in Altium: the STM32L432, the ATECC608B secure element on I2C, USB-C with ESD protection, and the LDO.</figcaption>
+      <figcaption>Full schematic in Altium, with the STM32L432, the ATECC608B on I2C, USB-C with ESD protection, and the LDO.</figcaption>
     </figure>
-
-    <p>I designed the board in Altium from start to finish, released the Gerbers, and hand-assembled the first units. A friend and I worked together on the software that goes with it.</p>
 
     <div class="pager">
       <a href="../projects.html">&#8592; Projects</a>
-      <a href="usb-uart-programmer.html">USB-to-UART Programmer &#8594;</a>
+      <a href="fpga-instrument.html">FPGA Instrument &#8594;</a>
     </div>
   </article>
 

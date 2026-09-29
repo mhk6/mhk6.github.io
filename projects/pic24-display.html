@@ -25,15 +25,12 @@
   <article class="article">
     <a class="back" href="../projects.html">&#8592; Projects</a>
     <h1 style="view-transition-name:t-pic24">Wireless Motion-Controlled Display</h1>
-    <p class="tech">PIC24 · LIS3DH · RFM69 · C · <a href="https://github.com/Nathan-Metko-UMN/2361-Project">GitHub</a></p>
+    <p class="tech">PIC24 · LIS3DH · RFM69 · C</p>
 
-    <p>Two wireless nodes that turn an accelerometer's motion into a live picture on an 8x8 LED matrix. When you tilt the sensor, a lit rectangle slides around the grid, and the Z axis changes how big it is.</p>
-
-    <h2>The idea</h2>
-    <p>This was a four-person project. It started as a way to help drone pilots see their acceleration at a glance, but honestly it's mostly just fun to watch.</p>
+    <p>Two wireless PIC24 nodes that turn an accelerometer's motion into a live picture on an 8x8 LED matrix. Tilting the sensor slides a lit rectangle around the grid, and the Z axis changes how big it is. It was a four-person class project, and the original idea was a display that could show a drone pilot their acceleration at a glance.</p>
 
     <h2>My part</h2>
-    <p>I focused on the display side. I worked on the DOGS104 LCD and the LED matrix, and I wrote the code that takes the raw accelerometer numbers and turns them into motion on the screen. My teammates handled the RFM69 radio link and the LIS3DH accelerometer on the sensor node.</p>
+    <p>I worked on the display side, which covered the LED matrix, a DOGS104 LCD that shows live values like acceleration, and the code that turns raw accelerometer data into motion on the screen. My teammates handled the RFM69 radio link and the LIS3DH accelerometer on the sensor node.</p>
 
     <figure>
       <img src="../assets/img/pic24-system.png" alt="The two breadboard nodes. Left: PIC24, RFM69 radio, and LIS3DH accelerometer. Right: PIC24, radio, and the 8x8 LED matrix." />
@@ -41,12 +38,11 @@
     </figure>
 
     <h2>Fitting motion onto 64 pixels</h2>
-    <p>The main constraint was resolution. You can't show much on an 8x8 grid, so I clamp each axis to plus or minus 2 g and map X and Y onto one of eight positions, which is what moves the rectangle around. The Z axis goes through a set of thresholds that decide the rectangle's size and brightness, and everything is clamped so the shape never goes off the edge.</p>
-    <p>The fiddly part was getting from a raw accelerometer struct to motion that actually looks smooth and intentional on that few pixels. I also got a lot of bare-metal PIC24 practice out of it, and a better sense of how to split up work on a team.</p>
+    <p>The main constraint was resolution, since an 8x8 grid can't show much. I clamp each axis to plus or minus 2 g and map X and Y onto one of eight positions, which is what moves the rectangle around. The Z axis goes through a set of thresholds that set the rectangle's size and brightness, and everything is clamped so the shape never runs off the edge. Most of the work was getting that mapping to look like smooth, intentional motion on so few pixels.</p>
 
     <div class="pager">
       <a href="usb-uart-programmer.html">&#8592; USB-to-UART Programmer</a>
-      <a href="umn-solar.html">UMN Solar Vehicle &#8594;</a>
+      <a href="../projects.html">All projects &#8594;</a>
     </div>
   </article>
 

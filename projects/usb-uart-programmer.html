@@ -27,29 +27,26 @@
     <h1 style="view-transition-name:t-usbuart">USB-to-UART Programmer</h1>
     <p class="tech">Altium · CP2102N · USB-C</p>
 
-    <p>A programmer board I designed during my internship so we could flash an ESP32 system in one step instead of doing it by hand. It plugs into a laptop like a USB stick.</p>
+    <p>A programmer board I designed during my internship to flash an ESP32-based system in one step. It plugs straight into a laptop like a USB stick, and it became the team's standard flashing tool.</p>
 
     <h2>The problem</h2>
-    <p>Before this, the team flashed the ESP32 system with a Raspberry Pi Pico dev board jumpered over to a set of pogo pins. It worked, but it was slow and fiddly to set up, and buying a Pico for every person adds up. So I designed an actual programmer board. The pogo pins land right on it, and the whole thing plugs straight into a laptop.</p>
+    <p>Before this, the team flashed the system using a Raspberry Pi Pico dev board jumpered over to a set of pogo pins. It worked, but it was slow and fiddly to set up, and needing a Pico for every person adds up. So I designed a dedicated programmer board that the pogo pins land on directly. The main layout challenge was keeping the USB differential pair short and clean on a board that small.</p>
 
     <figure>
       <img src="../assets/img/usbuart-boards.png" alt="Top and bottom of the USB-to-UART programmer board in Altium." />
-      <figcaption>Board top and bottom (Altium).</figcaption>
+      <figcaption>Board top and bottom in Altium.</figcaption>
     </figure>
 
     <h2>One-click flashing</h2>
-    <p>My favorite part is the one-click flashing. An ESP32 only goes into its serial bootloader if GPIO0 is held low while it comes out of reset, so by hand you'd hold the boot button, tap reset, and then let go. My board does that by itself with a two-transistor circuit driven by the DTR and RTS lines on the CP2102N bridge. The flashing tool toggles those lines to pull GPIO0 low, pulse reset, and put the chip in its bootloader, and then it resets the chip back to normal once flashing is done. No buttons needed.</p>
+    <p>An ESP32 only enters its serial bootloader if GPIO0 is held low while it comes out of reset, so doing it by hand means holding the boot button, tapping reset, and letting go at the right time. The board handles that on its own with a two-transistor circuit driven by the CP2102N's DTR and RTS lines. The flashing tool toggles those lines to pull GPIO0 low and pulse reset, which puts the chip in its bootloader, and then resets it back to normal once flashing is done. So nobody has to touch a button.</p>
 
     <figure>
       <img src="../assets/img/usbuart-schematic-0.png" alt="Schematic of the USB-to-UART programmer: CP2102N bridge, auto-boot transistors, USB-C, and ESD protection." />
-      <figcaption>Schematic: CP2102N bridge, dual-transistor auto-boot, USB-C, and ESD protection.</figcaption>
+      <figcaption>Schematic with the CP2102N bridge, the two-transistor auto-boot circuit, USB-C, and ESD protection.</figcaption>
     </figure>
 
-    <h2>What I learned</h2>
-    <p>This was also my first time routing a USB differential pair, and keeping it clean on such a small board was the tricky part. The board ended up becoming the team's standard flashing tool.</p>
-
     <div class="pager">
-      <a href="gokey.html">&#8592; GoKey</a>
+      <a href="umn-solar.html">&#8592; UMN Solar Vehicle</a>
       <a href="pic24-display.html">Wireless Motion-Controlled Display &#8594;</a>
     </div>
   </article>
