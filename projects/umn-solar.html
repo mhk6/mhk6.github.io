@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UMN Solar Vehicle Power Board — Mohak Dua</title>
+  <meta name="description" content="A power-distribution board for the UMN Solar Vehicle Project. High-side load switch and a TPS54560 buck, running on this year's car." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../experience.html">Experience</a>
+      <a href="../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../projects.html">&#8592; Projects</a>
+    <h1 style="view-transition-name:t-solar">UMN Solar Vehicle, Power-Distribution Board</h1>
+    <p class="tech">Altium · TPS54560 · power</p>
+
+    <p>A power board I designed for the University of Minnesota Solar Vehicle Project. It's fabbed, soldered, and running on this year's car.</p>
+
+    <h2>What it needed to do</h2>
+    <p>The solar car's driver interface runs on a Raspberry Pi. The team moved it to a Pi HAT that needed 12 V and more current than the usual 5 V setup, so I designed a separate board just to handle that power cleanly and keep it apart from the rest of the electronics. A large connector links it to the battery and to the UI control board, which sends the enable signals.</p>
+
+    <figure>
+      <img src="../assets/img/solar-power-3d.png" alt="3D render of the solar vehicle power board in Altium." />
+      <figcaption>3D render of the board in Altium.</figcaption>
+    </figure>
+
+    <h2>Built around switching</h2>
+    <p>A high-side P-channel MOSFET works as a load switch, so the UI control board can turn 12 V to the Pi HAT on and off with a logic-level enable signal instead of cutting power somewhere messier. After that, a TPS54560 buck steps the 12 V down to a 5 V rail for the display, the Pi's other needs, and the USB port the driver might plug into. I picked the TPS54560 because it can easily handle the several amps the Pi, screen, and USB can pull together, and its wide input range works well on a noisy 12 V vehicle bus. On the input side there's fusing and transient protection, so a fault on the bus doesn't make it further into the system.</p>
+
+    <figure>
+      <img src="../assets/img/solar-power-layout.png" alt="Two-layer copper layout and routing of the solar power board." />
+      <figcaption>Two-layer layout and routing.</figcaption>
+    </figure>
+    <figure>
+      <img src="../assets/img/solar-power-schematic.png" alt="Schematic of the solar power board: TPS54560 buck, FDS6675BZ high-side load switch, fusing and transient protection." />
+      <figcaption>Schematic: TPS54560 buck, FDS6675BZ high-side load switch, input fusing and protection.</figcaption>
+    </figure>
+
+    <p>I did the layout, released it, reflow-soldered it, and now it's running on this year's car.</p>
+
+    <div class="pager">
+      <a href="pic24-display.html">&#8592; Wireless Motion-Controlled Display</a>
+      <a href="flight-controller.html">ELRS Flight Controller &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

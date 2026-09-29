@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wireless Motion-Controlled Display — Mohak Dua</title>
+  <meta name="description" content="A two-node PIC24 wireless system that turns accelerometer motion into a picture on an 8x8 LED matrix." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../experience.html">Experience</a>
+      <a href="../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../projects.html">&#8592; Projects</a>
+    <h1 style="view-transition-name:t-pic24">Wireless Motion-Controlled Display</h1>
+    <p class="tech">PIC24 · LIS3DH · RFM69 · C · <a href="https://github.com/Nathan-Metko-UMN/2361-Project">GitHub</a></p>
+
+    <p>Two wireless nodes that turn an accelerometer's motion into a live picture on an 8x8 LED matrix. When you tilt the sensor, a lit rectangle slides around the grid, and the Z axis changes how big it is.</p>
+
+    <h2>The idea</h2>
+    <p>This was a four-person project. It started as a way to help drone pilots see their acceleration at a glance, but honestly it's mostly just fun to watch.</p>
+
+    <h2>My part</h2>
+    <p>I focused on the display side. I worked on the DOGS104 LCD and the LED matrix, and I wrote the code that takes the raw accelerometer numbers and turns them into motion on the screen. My teammates handled the RFM69 radio link and the LIS3DH accelerometer on the sensor node.</p>
+
+    <figure>
+      <img src="../assets/img/pic24-system.png" alt="The two breadboard nodes. Left: PIC24, RFM69 radio, and LIS3DH accelerometer. Right: PIC24, radio, and the 8x8 LED matrix." />
+      <figcaption>The two nodes on the bench. Left: PIC24, RFM69 radio, and LIS3DH accelerometer. Right: PIC24, radio, and the 8x8 LED matrix.</figcaption>
+    </figure>
+
+    <h2>Fitting motion onto 64 pixels</h2>
+    <p>The main constraint was resolution. You can't show much on an 8x8 grid, so I clamp each axis to plus or minus 2 g and map X and Y onto one of eight positions, which is what moves the rectangle around. The Z axis goes through a set of thresholds that decide the rectangle's size and brightness, and everything is clamped so the shape never goes off the edge.</p>
+    <p>The fiddly part was getting from a raw accelerometer struct to motion that actually looks smooth and intentional on that few pixels. I also got a lot of bare-metal PIC24 practice out of it, and a better sense of how to split up work on a team.</p>
+
+    <div class="pager">
+      <a href="usb-uart-programmer.html">&#8592; USB-to-UART Programmer</a>
+      <a href="umn-solar.html">UMN Solar Vehicle &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

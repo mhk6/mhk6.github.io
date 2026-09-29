@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELRS Flight Controller — Mohak Dua</title>
+  <meta name="description" content="A four-layer flight controller for a five-inch quad with an on-board 2.4 GHz ExpressLRS receiver. STM32F405, KiCad." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../experience.html">Experience</a>
+      <a href="../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../projects.html">&#8592; Projects</a>
+    <h1 style="view-transition-name:t-fc">ELRS Flight Controller</h1>
+    <p class="tech">KiCad · STM32F405 · ExpressLRS · Betaflight</p>
+
+    <p>A four-layer flight controller for a 5-inch quadcopter, with a 2.4 GHz ExpressLRS receiver built right onto the board instead of hanging off it as a separate module.</p>
+
+    <h2>Why this one</h2>
+    <p>I want to build a full drone at some point, so I started with the brains of it: a flight controller with the sensors and the radio on one board. It's built around an STM32F405 running Betaflight, with an ICM-42688-P gyro, a blackbox flash chip for logging, and its own power tree that takes up to a 6S battery.</p>
+
+    <figure>
+      <img src="../assets/img/fc-schematic.png" alt="KiCad schematic of the flight controller: STM32F405 core, ICM-42688-P gyro, VDDA filtering, and blackbox flash." />
+      <figcaption>The schematic in KiCad: STM32F405 core, ICM-42688-P gyro, VDDA filtering, and blackbox flash.</figcaption>
+    </figure>
+
+    <h2>First RF, first four layers</h2>
+    <p>This one was a big step up for me. It's my first four-layer board, so I got to learn what the extra planes actually get you and get comfortable routing with them.</p>
+    <p>It's also my first real RF design. Having the receiver on the board meant the antenna match and the RF layout were on me to get right. It was the first time I designed to a controlled target impedance, instead of just routing it and hoping it works, which I could get away with on USB 2.0 full-speed.</p>
+
+    <div class="pager">
+      <a href="umn-solar.html">&#8592; UMN Solar Vehicle</a>
+      <a href="fpga-instrument.html">FPGA Instrument &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

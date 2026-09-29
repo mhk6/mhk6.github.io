@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experience — Mohak Dua</title>
+  <meta name="description" content="Mohak Dua's engineering experience: Calyan Technologies, UMN Solar Vehicle, and Meerkats World." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+  <script type="module" src="assets/js/model-viewer.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="experience.html" class="active">Experience</a>
+      <a href="projects.html">Projects</a>
+    </div>
+  </nav>
+
+  <section class="experience" style="padding-top:1rem">
+
+    <div class="exp reveal">
+      <div class="logo-cell"><model-viewer class="logo3d" src="assets/models/calyan.glb" alt="Calyan Technologies logo"
+        camera-controls auto-rotate rotation-per-second="14deg" interaction-prompt="none"
+        environment-image="assets/models/env-studio.hdr" tone-mapping="neutral" exposure="0.95"
+        shadow-intensity="0" camera-orbit="0deg 74deg auto" disable-zoom touch-action="pan-y"></model-viewer></div>
+      <div class="exp-body">
+        <div class="exp-head">
+          <div class="co">Calyan Technologies</div>
+          <div class="when">May 2026 to August 2026</div>
+        </div>
+        <div class="role">Electrical Engineering Intern</div>
+        <div class="desc">I worked on firmware, electronics, and testing for embedded medical-device hardware. I designed the USB-to-UART programmer the team now uses as its standard flashing tool, ran more than 120 verification and validation steps, and caught a power-chain problem before fabrication by checking my LTspice models against bench measurements.</div>
+      </div>
+    </div>
+
+    <div class="exp reveal">
+      <div class="logo-cell"><model-viewer class="logo3d" src="assets/models/umnsvp.glb" alt="UMN Solar Vehicle logo"
+        camera-controls auto-rotate rotation-per-second="14deg" interaction-prompt="none"
+        environment-image="assets/models/env-studio.hdr" tone-mapping="neutral" exposure="0.95"
+        shadow-intensity="0" camera-orbit="0deg 74deg auto" disable-zoom touch-action="pan-y"></model-viewer></div>
+      <div class="exp-body">
+        <div class="exp-head">
+          <div class="co">UMN Solar Vehicle &amp; Gopher Motorsports</div>
+          <div class="when">September 2024 to Present</div>
+        </div>
+        <div class="role">Hardware Design Engineer</div>
+        <div class="desc">I design PCBs and do a lot of the hands-on electrical work for two student vehicle teams. That's included a power-distribution board and a hardware-in-the-loop test board, plus wiring harnesses, soldering, and tracking down problems during competition drive days.</div>
+      </div>
+    </div>
+
+    <div class="exp reveal">
+      <div class="logo-cell"><model-viewer class="logo3d" src="assets/models/meerkats.glb" alt="Meerkats World logo"
+        camera-controls auto-rotate rotation-per-second="14deg" interaction-prompt="none"
+        environment-image="assets/models/env-studio.hdr" tone-mapping="neutral" exposure="0.95"
+        shadow-intensity="0" camera-orbit="0deg 74deg auto" disable-zoom touch-action="pan-y"></model-viewer></div>
+      <div class="exp-body">
+        <div class="exp-head">
+          <div class="co">Meerkats World</div>
+          <div class="when">May 2025 to August 2025</div>
+        </div>
+        <div class="role">Embedded Systems Intern</div>
+        <div class="desc">I prototyped a waterproof IoT monitoring system on an ESP32 with pH, TDS, and temperature sensors. I calibrated the sensors against control solutions and set up an MQTT pipeline that sent the readings to a live Grafana dashboard.</div>
+      </div>
+    </div>
+
+  </section>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

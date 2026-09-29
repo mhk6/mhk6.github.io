@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projects — Mohak Dua</title>
+  <meta name="description" content="Hardware and embedded projects by Mohak Dua: security keys, flight controllers, power boards, and more." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="experience.html">Experience</a>
+      <a href="projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <section class="projects" style="padding-top:1rem">
+
+    <a class="proj reveal" href="projects/gokey.html">
+      <div class="proj-head">
+        <span class="thumb"><img src="assets/img/thumbs/gokey.jpg" alt="" /></span>
+        <div class="proj-title">
+          <div class="name" style="view-transition-name:t-gokey">GoKey, a USB Security Key <span class="arrow">&#8594;</span></div>
+          <div class="stack">Altium · STM32L4 · ATECC608B · USB-C</div>
+        </div>
+      </div>
+      <div class="desc">A USB-C security key that keeps its private keys in a secure element instead of the microcontroller's flash.</div>
+    </a>
+
+    <a class="proj reveal" href="projects/usb-uart-programmer.html">
+      <div class="proj-head">
+        <span class="thumb"><img src="assets/img/thumbs/usbuart.jpg" alt="" /></span>
+        <div class="proj-title">
+          <div class="name" style="view-transition-name:t-usbuart">USB-to-UART Programmer <span class="arrow">&#8594;</span></div>
+          <div class="stack">Altium · CP2102N · USB-C</div>
+        </div>
+      </div>
+      <div class="desc">A one-click ESP32 flashing board I made at my internship. It replaced a slow jumpered dev-board setup and ended up being the team's standard tool.</div>
+    </a>
+
+    <a class="proj reveal" href="projects/pic24-display.html">
+      <div class="name" style="view-transition-name:t-pic24">Wireless Motion-Controlled Display <span class="arrow">&#8594;</span></div>
+      <div class="stack">PIC24 · LIS3DH · RFM69 · C</div>
+      <div class="desc">Two PIC24 nodes talking over radio. Tilt the accelerometer on one and a picture moves around an 8x8 LED matrix on the other.</div>
+    </a>
+
+    <a class="proj reveal" href="projects/umn-solar.html">
+      <div class="proj-head">
+        <span class="thumb"><img src="assets/img/thumbs/solar.jpg" alt="" /></span>
+        <div class="proj-title">
+          <div class="name" style="view-transition-name:t-solar">UMN Solar Vehicle, Power Board <span class="arrow">&#8594;</span></div>
+          <div class="stack">Altium · TPS54560 · power</div>
+        </div>
+      </div>
+      <div class="desc">The board that powers the solar car's Raspberry Pi interface. It's running on this year's car.</div>
+    </a>
+
+    <a class="proj reveal" href="projects/flight-controller.html">
+      <div class="name" style="view-transition-name:t-fc">ELRS Flight Controller <span class="arrow">&#8594;</span></div>
+      <div class="stack">KiCad · STM32F405 · ExpressLRS · Betaflight</div>
+      <div class="desc">A four-layer flight controller for a 5-inch quad, with a 2.4 GHz ExpressLRS receiver right on the board.</div>
+    </a>
+
+    <a class="proj reveal" href="projects/fpga-instrument.html">
+      <div class="proj-head">
+        <span class="thumb"><img src="assets/img/thumbs/fpga.jpg" alt="" /></span>
+        <div class="proj-title">
+          <div class="name" style="view-transition-name:t-fpga">FPGA Mixed-Signal Instrument <span class="arrow">&#8594;</span></div>
+          <div class="stack">SystemVerilog · Artix-7 · Vivado · Python</div>
+        </div>
+      </div>
+      <div class="desc">An oscilloscope and 8-channel logic analyzer on an Artix-7 FPGA, with a Python app on the PC side.</div>
+    </a>
+
+  </section>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

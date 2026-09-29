@@ -1,0 +1,261 @@
+/* ============================================================
+   Mohak Dua — portfolio. Flat, monospace, clean. No glow, no
+   gradients, no shadows, no hover-lift. Dark only.
+   ============================================================ */
+
+@font-face{
+  font-family:"Departure Mono";
+  src:url("../fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-weight:400; font-style:normal; font-display:swap;
+}
+
+:root{
+  --bg:#202228;
+  --text:#e9e9ee;
+  --muted:#9a9ba5;
+  --dim:#767781;
+  --line:#363944;
+  --line-hover:#4b4f5b;
+  --accent:#7d97ff;
+  --accent-soft:rgba(125,151,255,0.15);
+  --grid:rgba(125,151,255,0.5);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --display:"Departure Mono","JetBrains Mono",ui-monospace,monospace;
+  --maxw:52rem;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--mono); font-size:15px; line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 1.5rem 6rem}
+.squares{position:fixed; inset:0; z-index:0; pointer-events:none}
+.squares svg{width:100%; height:100%}
+.tetris-bg{display:block; width:100%; height:100%}
+
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline; text-underline-offset:3px}
+
+/* ---- nav ---- */
+.nav{display:flex; align-items:center; gap:1.7rem; padding:2rem 0 3rem}
+.nav .logo{display:flex; align-items:center; color:var(--accent)}
+.nav .logo:hover{text-decoration:none}
+.logo-mark{width:18px; height:18px; display:block}
+.nav .links{display:flex; gap:1.6rem}
+.nav .links a{color:var(--muted); font-size:1rem; position:relative; line-height:1}
+.nav .links a:hover{color:var(--text); text-decoration:none}
+.nav .links a.active{color:var(--accent)}
+.nav .links a.active::after{content:""; position:absolute; left:0; right:0; bottom:-5px; height:1.5px; background:var(--accent)}
+
+/* ---- hero (home) ---- */
+.hero{position:relative; padding:6vh 0 3rem; min-height:56vh}
+.hero-main{display:flex; align-items:center; justify-content:space-between; gap:3rem}
+.hero-text{max-width:40rem}
+.hero h1{font-weight:700; font-size:2.6rem; letter-spacing:-.01em; margin:0 0 .35rem}
+.hero .role{color:var(--muted); font-size:1.05rem; margin:0 0 1.5rem}
+.hero p{color:var(--text); margin:0}
+.hero-photo{flex:none}
+.photo{
+  width:220px; height:220px; border-radius:50%; border:2px solid var(--line);
+  background:#191b21;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+  color:var(--muted); font-weight:700; font-size:2.8rem;
+}
+.photo img{width:100%; height:100%; object-fit:cover}
+.tag{color:var(--accent); background:var(--accent-soft); padding:.06rem .35rem; border-radius:0; white-space:nowrap}
+.actions{display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.7rem}
+.btn{
+  border:1px solid var(--line); color:var(--text);
+  padding:.55rem 1.05rem; border-radius:0; font-size:.95rem;
+  transition:border-color .15s, color .15s;
+}
+.btn:hover{border-color:var(--accent); color:var(--accent); text-decoration:none}
+.btn.primary{border-color:var(--accent); color:var(--accent)}
+.btn.primary:hover{background:var(--accent-soft)}
+
+/* ---- section label ---- */
+.section{padding-top:3.4rem}
+.section > h2{
+  color:var(--dim); font-size:.8rem; font-weight:500; letter-spacing:.05em;
+  margin:0 0 1.5rem; padding-bottom:.6rem; border-bottom:1px solid var(--line);
+}
+
+/* ---- projects (flat rows, thin-bordered description) ---- */
+.projects{display:flex; flex-direction:column; gap:2.1rem}
+.proj{display:block}
+.proj-head{display:flex; gap:1.2rem; align-items:center}
+.thumb{
+  width:150px; height:100px; flex:none; border:1px solid var(--line); border-radius:0;
+  overflow:hidden; background:#191b21;
+}
+.thumb img{width:100%; height:100%; object-fit:contain; display:block}
+.proj:hover .thumb{border-color:var(--line-hover)}
+.proj-title{min-width:0}
+.proj .name{font-weight:700; font-size:1.3rem; color:var(--text)}
+.proj .arrow{color:var(--muted); font-weight:400}
+.proj:hover .name, .proj:hover .arrow{color:var(--accent)}
+.proj .stack{color:var(--muted); font-size:.83rem; margin-top:.2rem}
+.proj .desc{
+  margin-top:.75rem; border:1px solid var(--line); border-radius:0;
+  padding:.7rem .95rem; color:var(--muted); font-size:.9rem;
+  transition:border-color .15s, color .15s;
+}
+.proj:hover .desc{border-color:var(--accent); color:var(--text)}
+
+/* ---- experience (flat rows, 3D logo on a grid floor, date right) ---- */
+.experience{display:flex; flex-direction:column; gap:3.6rem}
+.exp{display:grid; grid-template-columns:180px minmax(0,1fr); column-gap:2.8rem; align-items:start}
+.exp-head{display:flex; justify-content:space-between; align-items:baseline; gap:1.5rem}
+.exp-head .co{flex:1 1 auto; min-width:0}
+.exp .when{flex:none}
+.logo-cell{position:relative; width:180px; height:200px}
+.logo-cell::before{
+  content:""; position:absolute; left:50%; bottom:0; width:132%; height:82px;
+  transform:translateX(-50%) perspective(220px) rotateX(62deg); transform-origin:bottom center;
+  background-image:
+    linear-gradient(var(--grid) 1.2px, transparent 1.2px),
+    linear-gradient(90deg, var(--grid) 1.2px, transparent 1.2px);
+  background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(to top,#000 10%,transparent 92%);
+  mask-image:linear-gradient(to top,#000 10%,transparent 92%);
+  opacity:.55; pointer-events:none;
+}
+.logo3d{position:absolute; top:0; left:0; width:180px; height:158px; display:block; background:transparent; --poster-color:transparent}
+.logo3d::part(default-progress-bar){display:none}
+.exp-body{min-width:0}
+.exp .co{font-weight:700; font-size:1.35rem; color:var(--text)}
+.exp .role{color:var(--muted); font-size:.95rem; margin-top:.25rem}
+.exp .desc{color:var(--muted); font-size:.95rem; margin-top:.65rem; max-width:44rem; line-height:1.7}
+.exp .when{color:var(--muted); font-size:.95rem; white-space:nowrap; text-align:right}
+
+/* ---- footer ---- */
+.foot{
+  margin-top:4.5rem; padding-top:1.5rem; border-top:1px solid var(--line);
+  color:var(--muted); font-size:.82rem; display:flex; gap:1.3rem; flex-wrap:wrap; align-items:center;
+}
+.foot a{color:var(--muted)} .foot a:hover{color:var(--accent)}
+.foot .copy{margin-left:auto; color:var(--dim)}
+
+/* ============================================================
+   Project article pages
+   ============================================================ */
+.back{color:var(--muted); font-size:.85rem}
+.back:hover{color:var(--accent); text-decoration:none}
+.article{padding-top:.5rem}
+.article h1{font-size:1.95rem; font-weight:700; margin:1.8rem 0 .5rem; letter-spacing:-.01em}
+.article .meta{color:var(--muted); font-size:.85rem; margin:0 0 .3rem}
+.article .tech{color:var(--accent); font-size:.85rem; margin:0 0 1.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--line)}
+.article h2{font-size:1.15rem; font-weight:700; margin:2.4rem 0 .8rem}
+.article p{color:#c9c9d0; margin:0 0 1.1rem; max-width:44rem}
+.article ul{color:#c9c9d0; margin:0 0 1.1rem; padding-left:1.2rem; max-width:44rem}
+.article li{margin:.35rem 0}
+.article strong{color:var(--text)}
+figure{margin:1.8rem 0; text-align:center}
+figure img{max-width:100%; height:auto; border:1px solid var(--line); border-radius:0; background:#fff}
+figcaption{color:var(--muted); font-size:.78rem; margin-top:.6rem}
+.two-fig{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+.two-fig figure{margin:1rem 0}
+
+/* interactive 3D board (model-viewer) */
+figure.model3d{margin:1.8rem 0}
+.board3d{
+  width:100%; height:520px; display:block;
+  border:1px solid var(--line); border-radius:0; background:#191b21;
+  --poster-color:transparent;
+}
+.board3d::part(default-progress-bar){display:none}
+.board3d .hint{
+  position:absolute; left:.7rem; bottom:.7rem; color:var(--muted);
+  font-size:.72rem; background:rgba(25,27,33,.7); padding:.15rem .45rem; border-radius:0;
+  pointer-events:none;
+}
+@media (max-width:600px){ .board3d{height:360px} }
+.pager{display:flex; justify-content:space-between; gap:1rem; margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); font-size:.85rem}
+
+@media (max-width:720px){
+  .hero-main{flex-direction:column-reverse; align-items:flex-start; gap:2rem}
+  .photo{width:150px; height:150px; font-size:2rem}
+}
+@media (max-width:600px){
+  .hero h1{font-size:1.95rem}
+  .article h1{font-size:1.55rem}
+  .two-fig{grid-template-columns:1fr}
+  .exp{grid-template-columns:1fr; row-gap:.4rem}
+  .exp .when{text-align:left; padding-left:0}
+}
+
+/* ============================================================
+   Motion & personality
+   ============================================================ */
+/* Background tetrominoes gently float (staggered per piece) */
+.tetro{
+  transform-box:fill-box; transform-origin:center;
+  animation:floaty calc(6.5s + var(--i,0) * 0.55s) ease-in-out infinite;
+  animation-delay:calc(var(--i,0) * -0.8s);
+  will-change:transform;
+}
+@keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+
+/* Hero entrance on load */
+.hero-text > *{opacity:0; animation:riseIn .6s ease forwards}
+.hero-text > *:nth-child(1){animation-delay:.05s}
+.hero-text > *:nth-child(2){animation-delay:.14s}
+.hero-text > *:nth-child(3){animation-delay:.23s}
+.hero-text > *:nth-child(4){animation-delay:.32s}
+.hero-photo{opacity:0; animation:riseIn .7s ease .28s forwards}
+@keyframes riseIn{ from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none} }
+
+/* Scroll-in reveal for list rows */
+.js .reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease}
+.js .reveal.in{opacity:1; transform:none}
+.projects .proj:nth-child(2).reveal{transition-delay:.06s}
+.projects .proj:nth-child(3).reveal{transition-delay:.12s}
+.projects .proj:nth-child(4).reveal{transition-delay:.18s}
+.projects .proj:nth-child(5).reveal{transition-delay:.24s}
+.projects .proj:nth-child(6).reveal{transition-delay:.30s}
+.experience .exp:nth-child(2).reveal{transition-delay:.08s}
+.experience .exp:nth-child(3).reveal{transition-delay:.16s}
+
+/* Hover micro-interactions */
+.arrow{display:inline-block; transition:transform .18s ease}
+.proj:hover .arrow{transform:translateX(5px)}
+.pager a{display:inline-block; transition:transform .18s ease, color .15s ease}
+.pager a:hover{transform:translateX(3px)}
+.thumb img{transition:transform .35s ease}
+.proj:hover .thumb img{transform:scale(1.06)}
+.btn{transition:border-color .15s, color .15s, transform .15s}
+.btn:hover{transform:translateY(-1px)}
+
+/* Terminal typing cursor */
+.type-cursor{display:inline-block; width:.6ch; height:1.05em; vertical-align:-0.15em; margin-left:2px; background:var(--accent); animation:blink 1.05s step-end infinite}
+@keyframes blink{ 50%{opacity:0} }
+
+@media (prefers-reduced-motion: reduce){
+  .tetro,.hero-text>*,.hero-photo{animation:none !important; opacity:1 !important; transform:none !important}
+  .reveal{opacity:1 !important; transform:none !important; transition:none}
+  .arrow,.thumb img,.pager a,.btn{transition:none}
+  .type-cursor{display:none}
+}
+
+/* ============================================================
+   Pixel headings (last, to beat the font-weight:700 rules) + CRT wipe
+   ============================================================ */
+.hero h1, .article h1, .article h2, .proj .name, .exp .co, .section > h2{
+  font-family:var(--display); font-weight:400; letter-spacing:0;
+}
+
+/* Smooth page transitions (View Transitions API, cross-document).
+   Chromium morphs shared elements (project title -> article title) natively;
+   browsers without cross-document VT get the JS fade-out fallback below. */
+@view-transition{ navigation:auto; }
+::view-transition-group(*){ animation-duration:.42s; animation-timing-function:cubic-bezier(.4,0,.2,1); }
+::view-transition-old(root){ animation:pageFadeOut .24s ease both; }
+::view-transition-new(root){ animation:pageFadeIn .34s ease both; }
+@keyframes pageFadeOut{ to{ opacity:0; transform:translateY(-6px) } }
+@keyframes pageFadeIn{ from{ opacity:0; transform:translateY(10px) } }
+
+/* fallback: smooth fade-out on navigation where cross-document VT is unsupported */
+html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
