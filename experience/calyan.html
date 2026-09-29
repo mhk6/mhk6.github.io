@@ -30,20 +30,43 @@
     <p>I spent the summer as an electrical engineering intern at Calyan Technologies, a local medical tech startup building cardiac devices. Most of my time went into verification testing, bench measurements, and circuit simulation on the device hardware, and I built a couple of tools for the team along the way.</p>
 
     <h2>Firmware verification</h2>
-    <p>Most of July went into firmware verification. The team ran a formal 125-step system test protocol across the device's processors, and I ran more than 120 of those steps, several times over as new firmware builds and test units came in. That meant setting up the bench, driving the device through its operating modes, capturing the signals, and writing the results into the final test report. I also kept the running list of firmware issues we found and retested fixes on each new build, and I ported part of the team's Python test automation over to a new version of the hardware.</p>
+    <p class="stack">Python · pytest · Digilent Analog Discovery</p>
+    <p>I was responsible for the device's firmware verification test protocol, and I ran more than 120 test steps on it, several times over as new firmware builds and test units came in. That meant setting up the bench, driving the device through each of its operating modes, capturing the signals, and writing the results into the final test report.</p>
+    <p>I also kept the running list of firmware issues we found, covering things like power, memory tests, and parameter handling, and retested fixes on each new build. On the automation side, I ported part of the team's Python test suite over to a new version of the hardware, and I fixed bugs in the team's engineering app, the desktop app used to configure the device.</p>
 
     <h2>Tools I built</h2>
-    <p>In June I built a multi-sensor data-acquisition rig for lab testing. It's an ESP32 reading three accelerometers over two I2C buses plus an analog sensor channel, with FreeRTOS tasks split across both cores and a pulse input for lining the data up with the device's output. I wrote the firmware and a Python tool that goes with it for live plotting, filtering, and logging, and the rig was used during a lab study.</p>
-    <p>I also designed a <a href="../projects/usb-uart-programmer.html">USB-to-UART programmer</a> that became the team's standard way to flash one of its ESP32-based systems, and I fixed bugs in the team's engineering app, the desktop app used to configure the device.</p>
+    <h3>Multi-sensor data-acquisition rig</h3>
+    <p class="stack">ESP32 · FreeRTOS · I2C · Python</p>
+    <p>An ESP32 sampling three accelerometers at 400 Hz over two I2C buses plus an analog sensor channel, with FreeRTOS tasks split across both cores and a pulse input for lining the data up with the device's output. The ESP32's ADC was throwing noise spikes, so each analog sample is an average of a 32-read burst, and WiFi and Bluetooth stay off to keep the analog side quiet.</p>
+    <p>I wrote the firmware and a Python tool that goes with it for live plotting, zero-phase filtering, and logging. The rig was used during a lab study.</p>
 
-    <h2>Tracking down an output shortfall</h2>
-    <p>A teammate's verification test showed one of the device's outputs coming in under its target. I swept that output against load on the bench, which pointed to a small series resistance ahead of it, and then measured the feedback resistors directly and found they didn't match the values on the schematic. Putting those two together predicted the teammate's reading almost exactly, so it wasn't a programming problem, and the fix came down to a resistor change.</p>
-
-    <h2>Current draw measurements</h2>
-    <p>I measured the device's current draw across more than 250 operating configurations, covering different modes, output levels, and loads, using a Digilent Analog Discovery and a custom measurement script. Those numbers went into the device documentation. The measurements also caught firmware regressions, including a build where some modes drew around a hundred times more current than they should have, which I reproduced on multiple boards and traced back to its cause.</p>
+    <h3>USB-to-UART programmer</h3>
+    <p class="stack">Altium · CP2102N · USB-C</p>
+    <p>A board for flashing one of the team's ESP32-based systems over USB in one step, with an auto-boot circuit so nobody has to touch a button. It became the team's standard way to flash that system.</p>
+    <figure>
+      <a href="../projects/usb-uart-programmer.html"><img src="../assets/img/usbuart-boards.png" alt="Top and bottom of the USB-to-UART programmer board in Altium." /></a>
+      <figcaption>Board top and bottom. More on its <a href="../projects/usb-uart-programmer.html">project page</a>.</figcaption>
+    </figure>
 
     <h2>Circuit simulation</h2>
-    <p>I built LTspice simulations of parts of the device's circuitry, checking the component models against datasheets and hand calculations first. On a board that was already in evaluation, the simulations turned up several design issues, which I documented with proposed fixes. I also helped write the electrical specification and design documents.</p>
+    <p class="stack">LTspice</p>
+    <p>I built LTspice simulations of parts of the device's circuitry. Before trusting any results I checked the component models against datasheets and hand calculations, and in one case rebuilt a transistor model whose capacitances were several times too high.</p>
+    <p>On a high-voltage board that was already in evaluation, the simulations turned up five design issues, including a feedback resistor that kept the output well short of its target voltage and a supply that couldn't keep up with the load it was feeding. I documented each one with a proposed fix, and I also helped write the electrical specification and design documents.</p>
+
+    <h2>Tracking down an output shortfall</h2>
+    <p>A teammate's verification test showed one of the device's outputs coming in noticeably under its target voltage. Here's how I tracked it down:</p>
+    <ol>
+      <li><strong>Swept the output against load on the bench.</strong> The way it climbed with load pointed to a small series resistance ahead of the output.</li>
+      <li><strong>Checked all three output channels.</strong> The resistance was the same on each, so it had to be one shared element rather than three separate ones.</li>
+      <li><strong>Measured the feedback resistors directly.</strong> They didn't match the values on the schematic, which set the regulated ceiling lower than expected.</li>
+      <li><strong>Put the two together.</strong> The result predicted the teammate's reading almost exactly.</li>
+    </ol>
+    <p>So the programmed settings were never the problem, and getting the output to its target comes down to a resistor change.</p>
+
+    <h2>Current draw measurements</h2>
+    <p class="stack">Digilent Analog Discovery · custom measurement script</p>
+    <p>I measured the device's current draw across more than 250 operating configurations, covering different modes, output levels, and loads. Those numbers went into the device documentation.</p>
+    <p>The measurements also caught firmware regressions, including a build where some modes drew around a hundred times more current than they should have, which I reproduced on multiple boards and traced back to its cause.</p>
 
   </article>
 

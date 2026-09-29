@@ -260,3 +260,10 @@ figure.model3d{margin:1.8rem 0}
 
 /* fallback: smooth fade-out on navigation where cross-document VT is unsupported */
 html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
+
+/* ---- Detail-page extras: per-section tools line, numbered steps ---- */
+.article .stack{color:var(--accent); font-size:.8rem; margin:-.35rem 0 .9rem}
+.article ol{color:#c9c9d0; margin:0 0 1.1rem; padding-left:1.5rem; max-width:44rem}
+.article ol li{margin:.6rem 0; padding-left:.35rem}
+.article ol li::marker{color:var(--accent); font-family:var(--display)}
+.article ol li strong{color:var(--text)}
