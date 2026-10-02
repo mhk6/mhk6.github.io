@@ -310,7 +310,7 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 }
 .toc a:hover{color:var(--accent); border-color:var(--accent); text-decoration:none}
 
-/* --- document outline: hideaway drawer, like a word processor ---- */
+/* --- document outline: hideaway drawer, hierarchical ------------- */
 .outline-toggle{
   position:fixed; top:1.55rem; left:1.5rem; z-index:40;
   display:flex; align-items:center; gap:.55rem;
@@ -321,8 +321,8 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .outline-toggle .ico{display:inline-flex; flex-direction:column; gap:2px}
 .outline-toggle .ico i{display:block; width:11px; height:1.5px; background:currentColor}
 .outline{
-  position:fixed; top:4.6rem; left:1.5rem; z-index:39; width:13.5rem;
-  background:var(--bg); border:1px solid var(--line); padding:.9rem .95rem;
+  position:fixed; top:4.6rem; left:1.5rem; z-index:39; width:14.5rem;
+  background:var(--bg); border:1px solid var(--line); padding:.9rem .4rem .9rem .95rem;
   max-height:calc(100vh - 7rem); overflow-y:auto;
   transform:translateX(calc(-100% - 2rem)); opacity:0; visibility:hidden;
   transition:transform .22s ease, opacity .18s ease, visibility .22s;
@@ -330,15 +330,28 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .outline.open{transform:none; opacity:1; visibility:visible}
 .outline .hd{
   color:var(--dim); font-family:var(--display); font-size:.7rem;
-  letter-spacing:.16em; margin-bottom:.7rem;
+  letter-spacing:.16em; margin-bottom:.75rem;
 }
 .outline ol{list-style:none; margin:0; padding:0}
-.outline a{
-  display:block; color:var(--muted); font-size:.78rem; padding:.32rem 0 .32rem .7rem;
-  border-left:1px solid var(--line); line-height:1.4;
+
+/* page level */
+.outline .tree > li > .pg{
+  display:block; color:var(--muted); font-size:.79rem; line-height:1.4;
+  padding:.33rem 0 .33rem .75rem; border-left:1px solid var(--line);
 }
-.outline a:hover{color:var(--text); border-left-color:var(--line-hover); text-decoration:none}
-.outline a.on{color:var(--accent); border-left-color:var(--accent)}
+.outline .tree > li > .pg:hover{color:var(--text); border-left-color:var(--line-hover); text-decoration:none}
+.outline .tree > li.cur > .pg{
+  color:var(--accent); border-left:2px solid var(--accent); padding-left:.7rem; font-weight:700;
+}
+
+/* section level, only shown under the current page */
+.outline .sub{margin:.15rem 0 .5rem; padding-left:.75rem; border-left:1px solid var(--line)}
+.outline .sub a{
+  display:block; color:var(--dim); font-size:.74rem; line-height:1.35;
+  padding:.26rem 0 .26rem .7rem; border-left:1px solid transparent; margin-left:-1px;
+}
+.outline .sub a:hover{color:var(--text); text-decoration:none}
+.outline .sub a.on{color:var(--accent); border-left-color:var(--accent)}
 @media (prefers-reduced-motion: reduce){ .outline{transition:none} }
 
 /* --- power-tree block diagram ----------------------------------- */
