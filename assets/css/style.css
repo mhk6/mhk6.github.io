@@ -273,9 +273,9 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .article ol li strong{color:var(--text)}
 
 /* --- project sub-pages: equations + spec tables ----------------- */
-.article .eq{
-  margin:1.3rem 0; max-width:44rem; border-left:2px solid var(--accent);
-  padding:.55rem 0 .55rem 1.1rem;
+.article .eq{margin:1.9rem 0 2rem; max-width:44rem; padding-left:1.7rem}
+.article .stakes{
+  color:var(--text); font-size:1.02rem; line-height:1.7; max-width:40rem; margin:0 0 1.5rem;
 }
 .article .eq math{font-size:1.1rem; color:var(--text); font-family:var(--mono); text-align:left}
 .article .eq math[display="block"]{margin:.25rem 0}
@@ -292,23 +292,25 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .article .spec th{color:var(--accent); font-weight:400; border-bottom-color:var(--line-hover)}
 .article .spec td{color:#c9c9d0}
 .article .spec td:first-child{color:var(--text); white-space:nowrap}
-.subpages{display:flex; flex-direction:column; gap:1.1rem; margin:1.4rem 0 0}
-.subpage{display:block; border:1px solid var(--line); padding:.85rem 1rem}
-.subpage:hover{border-color:var(--accent); text-decoration:none}
-.subpage .name{color:var(--text); font-weight:700; font-size:1rem}
+.subpages{margin:1.5rem 0 0; border-top:1px solid var(--line)}
+.subpage{
+  display:grid; grid-template-columns:11rem minmax(0,1fr); gap:0 1.6rem;
+  padding:.95rem 0 1rem; border-bottom:1px solid var(--line);
+}
+.subpage:hover{text-decoration:none}
+.subpage .name{color:var(--text); font-weight:700; font-size:.97rem}
 .subpage:hover .name,.subpage:hover .arrow{color:var(--accent)}
-.subpage .desc{color:var(--muted); font-size:.85rem; margin-top:.25rem}
+.subpage .desc{color:var(--muted); font-size:.85rem; line-height:1.6}
+@media (max-width:620px){ .subpage{grid-template-columns:1fr; gap:.2rem} }
 
 /* --- block-diagram flow ---------------------------------------- */
 /* section navigation */
 .toc{
-  display:flex; flex-wrap:wrap; gap:.4rem .5rem; margin:0 0 2.2rem; padding:0; list-style:none;
+  display:flex; flex-wrap:wrap; gap:.2rem 1.6rem; margin:0 0 2.4rem; padding:0;
+  list-style:none; font-size:.78rem;
 }
-.toc a{
-  display:inline-block; border:1px solid var(--line); color:var(--muted);
-  font-size:.76rem; padding:.28rem .65rem;
-}
-.toc a:hover{color:var(--accent); border-color:var(--accent); text-decoration:none}
+.toc a{color:var(--muted); border-bottom:1px solid transparent; padding-bottom:1px}
+.toc a:hover{color:var(--accent); border-bottom-color:var(--accent); text-decoration:none}
 
 /* --- document outline: hideaway drawer, hierarchical ------------- */
 .outline-toggle{
@@ -358,7 +360,6 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .article .diagram{margin:1.6rem 0 1.8rem; max-width:44rem}
 .article .diagram svg{width:100%; height:auto; display:block}
 .article .diagram .bx{fill:var(--s1); stroke:var(--line); stroke-width:1}
-.article .diagram .bar{fill:var(--accent)}
 .article .diagram .ttl{fill:var(--text); font-family:var(--mono); font-size:11px}
 .article .diagram .sub{fill:var(--muted); font-family:var(--mono); font-size:9px}
 .article .diagram .volt{fill:var(--accent); font-family:var(--display); font-size:11px; letter-spacing:.04em}
@@ -473,3 +474,26 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .article .rfviz .legend .k.car{background:#6f7a93}
 .article .rfviz .legend .k.mod{background:#7d97ff}
 @media (max-width:620px){ .article .rfviz canvas{height:190px} }
+
+/* --- disclosure: a rule and a control, not a filled card -------- */
+.article details{
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  max-width:44rem; margin:1.8rem 0;
+}
+.article details + details{margin-top:-1.8rem; border-top:0}
+.article details summary{
+  display:flex; align-items:center; gap:.75rem; cursor:pointer; list-style:none;
+  padding:.72rem 0; color:var(--text); font-size:.86rem; user-select:none;
+}
+.article details summary::-webkit-details-marker{display:none}
+.article details summary::before{
+  content:"+"; flex:none; width:1.3rem; height:1.3rem; line-height:1.2rem; text-align:center;
+  border:1px solid var(--line-hover); color:var(--accent); font-size:1rem;
+}
+.article details[open] summary::before{content:"\2212"}
+.article details summary::after{content:"expand"; margin-left:auto; color:var(--dim); font-size:.72rem}
+.article details[open] summary::after{content:"collapse"}
+.article details summary:hover{color:var(--accent)}
+.article details summary:hover::before{border-color:var(--accent); background:var(--accent-soft)}
+.article details > summary + *{margin-top:.4rem}
+.article details > *:last-child{margin-bottom:1.1rem}
