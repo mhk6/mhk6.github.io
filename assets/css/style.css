@@ -22,10 +22,14 @@
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --display:"Departure Mono","JetBrains Mono",ui-monospace,monospace;
   --maxw:52rem;
+  --s1:#1b1d22;
+  --s2:#191b20;
+  --s3:#25272f;
 }
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden}
 body{
   margin:0; background:var(--bg); color:var(--text);
   font-family:var(--mono); font-size:15px; line-height:1.7;
@@ -267,3 +271,192 @@ html.pt-leaving body{ opacity:0; transition:opacity .22s ease }
 .article ol li{margin:.6rem 0; padding-left:.35rem}
 .article ol li::marker{color:var(--accent); font-family:var(--display)}
 .article ol li strong{color:var(--text)}
+
+/* --- project sub-pages: equations + spec tables ----------------- */
+.article .eq{
+  margin:1.3rem 0; max-width:44rem; border-left:2px solid var(--accent);
+  padding:.55rem 0 .55rem 1.1rem;
+}
+.article .eq math{font-size:1.1rem; color:var(--text); font-family:var(--mono); text-align:left}
+.article .eq math[display="block"]{margin:.25rem 0}
+.article .eq .res{color:var(--accent)}
+.article .eq .note{color:var(--muted); font-size:.78rem; margin:.4rem 0 0; display:block}
+.article .eq .given{color:var(--muted); font-size:.78rem; margin:0 0 .45rem; display:block}
+.article .spec{
+  width:100%; max-width:44rem; border-collapse:collapse;
+  font-size:.82rem; margin:0 0 1.3rem;
+}
+.article .spec th,.article .spec td{
+  text-align:left; padding:.45rem .7rem; border-bottom:1px solid var(--line); vertical-align:top;
+}
+.article .spec th{color:var(--accent); font-weight:400; border-bottom-color:var(--line-hover)}
+.article .spec td{color:#c9c9d0}
+.article .spec td:first-child{color:var(--text); white-space:nowrap}
+.subpages{display:flex; flex-direction:column; gap:1.1rem; margin:1.4rem 0 0}
+.subpage{display:block; border:1px solid var(--line); padding:.85rem 1rem}
+.subpage:hover{border-color:var(--accent); text-decoration:none}
+.subpage .name{color:var(--text); font-weight:700; font-size:1rem}
+.subpage:hover .name,.subpage:hover .arrow{color:var(--accent)}
+.subpage .desc{color:var(--muted); font-size:.85rem; margin-top:.25rem}
+
+/* --- block-diagram flow ---------------------------------------- */
+/* section navigation */
+.toc{
+  display:flex; flex-wrap:wrap; gap:.4rem .5rem; margin:0 0 2.2rem; padding:0; list-style:none;
+}
+.toc a{
+  display:inline-block; border:1px solid var(--line); color:var(--muted);
+  font-size:.76rem; padding:.28rem .65rem;
+}
+.toc a:hover{color:var(--accent); border-color:var(--accent); text-decoration:none}
+
+/* --- document outline: hideaway drawer, like a word processor ---- */
+.outline-toggle{
+  position:fixed; top:1.55rem; left:1.5rem; z-index:40;
+  display:flex; align-items:center; gap:.55rem;
+  font-family:var(--mono); font-size:.74rem; color:var(--muted);
+  background:var(--bg); border:1px solid var(--line); padding:.4rem .7rem; cursor:pointer;
+}
+.outline-toggle:hover{color:var(--accent); border-color:var(--accent)}
+.outline-toggle .ico{display:inline-flex; flex-direction:column; gap:2px}
+.outline-toggle .ico i{display:block; width:11px; height:1.5px; background:currentColor}
+.outline{
+  position:fixed; top:4.6rem; left:1.5rem; z-index:39; width:13.5rem;
+  background:var(--bg); border:1px solid var(--line); padding:.9rem .95rem;
+  max-height:calc(100vh - 7rem); overflow-y:auto;
+  transform:translateX(calc(-100% - 2rem)); opacity:0; visibility:hidden;
+  transition:transform .22s ease, opacity .18s ease, visibility .22s;
+}
+.outline.open{transform:none; opacity:1; visibility:visible}
+.outline .hd{
+  color:var(--dim); font-family:var(--display); font-size:.7rem;
+  letter-spacing:.16em; margin-bottom:.7rem;
+}
+.outline ol{list-style:none; margin:0; padding:0}
+.outline a{
+  display:block; color:var(--muted); font-size:.78rem; padding:.32rem 0 .32rem .7rem;
+  border-left:1px solid var(--line); line-height:1.4;
+}
+.outline a:hover{color:var(--text); border-left-color:var(--line-hover); text-decoration:none}
+.outline a.on{color:var(--accent); border-left-color:var(--accent)}
+@media (prefers-reduced-motion: reduce){ .outline{transition:none} }
+
+/* --- power-tree block diagram ----------------------------------- */
+.article .diagram{margin:1.6rem 0 1.8rem; max-width:44rem}
+.article .diagram svg{width:100%; height:auto; display:block}
+.article .diagram .bx{fill:var(--s1); stroke:var(--line); stroke-width:1}
+.article .diagram .bar{fill:var(--accent)}
+.article .diagram .ttl{fill:var(--text); font-family:var(--mono); font-size:11px}
+.article .diagram .sub{fill:var(--muted); font-family:var(--mono); font-size:9px}
+.article .diagram .volt{fill:var(--accent); font-family:var(--display); font-size:11px; letter-spacing:.04em}
+.article .diagram .ln{stroke:var(--line-hover); stroke-width:1.2; fill:none}
+.article .diagram .hd{fill:var(--dim); font-family:var(--display); font-size:8px; letter-spacing:.14em}
+
+/* --- third-party sandbox embed ---------------------------------- */
+.article .sandbox{
+  border:1px solid var(--line); background:var(--s1); max-width:44rem; margin:1.4rem 0;
+}
+.article .sandbox .bar{
+  display:flex; align-items:center; gap:.8rem; padding:.75rem .9rem;
+  border-bottom:1px solid var(--line); font-size:.8rem; color:var(--muted);
+}
+.article .sandbox .bar b{color:var(--text); font-weight:500}
+.article .sandbox .bar .sp{margin-left:auto}
+.article .sandbox button,.article .sandbox .lnk{
+  font-family:var(--mono); font-size:.74rem; color:var(--muted); background:transparent;
+  border:1px solid var(--line); padding:.25rem .7rem; cursor:pointer;
+}
+.article .sandbox button:hover,.article .sandbox .lnk:hover{
+  color:var(--accent); border-color:var(--accent); text-decoration:none;
+}
+.article .sandbox .frame{position:relative; height:0; padding-bottom:62%; background:var(--s2)}
+.article .sandbox iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+.article .sandbox .ph{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  color:var(--dim); font-size:.8rem; text-align:center; padding:1.5rem;
+}
+
+/* --- large, immersive sandbox ----------------------------------- */
+.article .sandbox.big{max-width:none; margin:0}
+.article .sandbox.big .frame{height:min(76vh, 780px); min-height:460px; padding-bottom:0}
+.article .sandbox.big .bar{padding:.85rem 1rem; font-size:.84rem}
+@media (max-width:760px){
+  .article .sandbox.big .frame{height:min(70vh, 520px); min-height:360px}
+}
+.band.wide{padding-inline:max(1.5rem, calc(50vw - 35rem))}
+.band.wide .cap{max-width:44rem; margin-inline:auto}
+
+/* --- article rhythm, hierarchy and bands (restored) ------------- */
+.article .lead{
+  color:var(--text); font-size:1.05rem; line-height:1.75; max-width:42rem; margin:0 0 1.4rem;
+}
+.article h2{
+  margin-top:3.6rem; font-size:1.25rem; padding-top:1.4rem; border-top:1px solid var(--line);
+}
+.article h2:first-of-type{margin-top:2.6rem}
+.article h2 .num{
+  color:var(--accent); font-family:var(--display); font-size:.78rem;
+  letter-spacing:.14em; display:block; margin-bottom:.5rem; font-weight:400;
+}
+.article h3{
+  font-size:1rem; font-weight:700; color:var(--text); margin:2.1rem 0 .7rem; letter-spacing:.01em;
+}
+.article p{letter-spacing:.005em}
+.band{
+  margin-inline:calc(50% - 50vw); padding-inline:calc(50vw - 50%);
+  padding-block:1.8rem; background:var(--s2);
+  border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  margin-block:2.6rem;
+}
+.band > :first-child{margin-top:0}
+.band > :last-child{margin-bottom:0}
+.band .cap{color:var(--muted); font-size:.78rem; max-width:46rem; margin:1.1rem auto 0}
+.band .cap b{color:var(--text); font-weight:500}
+
+/* --- how-to strip above an embedded sim ------------------------- */
+.article .howto{
+  display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0;
+  border-bottom:1px solid var(--line); background:var(--s3);
+}
+.article .howto .step{
+  display:flex; gap:.7rem; align-items:flex-start;
+  padding:.85rem 1rem; border-right:1px solid var(--line); min-width:0;
+}
+.article .howto .step:last-child{border-right:0}
+.article .howto .n{
+  flex:none; width:1.3rem; height:1.3rem; line-height:1.2rem; text-align:center;
+  border:1px solid var(--accent); color:var(--accent);
+  font-family:var(--display); font-size:.74rem;
+}
+.article .howto .tx{color:var(--text); font-size:.8rem; line-height:1.55}
+.article .howto .tx em{color:var(--muted); font-style:normal; display:block; font-size:.74rem; margin-top:.15rem}
+.article .key{
+  display:inline-block; border:1px solid var(--accent); background:var(--accent-soft);
+  color:var(--accent); padding:0 .35rem; font-size:.76rem; letter-spacing:.03em;
+}
+@media (max-width:760px){
+  .article .howto{grid-template-columns:1fr}
+  .article .howto .step{border-right:0; border-bottom:1px solid var(--line)}
+  .article .howto .step:last-child{border-bottom:0}
+}
+
+/* --- rolling modulation scope ----------------------------------- */
+.article .rfviz{max-width:46rem; margin:0 auto}
+.article .rfviz .hdr{display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:.9rem}
+.article .rfviz .ttl{color:var(--accent); font-family:var(--display); font-size:.76rem; letter-spacing:.12em}
+.article .rfviz button{
+  font-family:var(--mono); font-size:.72rem; color:var(--muted); background:transparent;
+  border:1px solid var(--line); padding:.22rem .7rem; cursor:pointer;
+}
+.article .rfviz button:hover{color:var(--accent); border-color:var(--accent)}
+.article .rfviz .screen{background:#15171c; border:1px solid var(--line); padding:.5rem}
+.article .rfviz canvas{width:100%; display:block; height:230px}
+.article .rfviz .legend{
+  display:flex; flex-wrap:wrap; gap:.4rem 1.4rem; align-items:center;
+  color:var(--muted); font-size:.74rem; margin:.8rem 0 0;
+}
+.article .rfviz .legend .k{display:inline-block; width:14px; height:2px; margin-right:.45rem; vertical-align:middle}
+.article .rfviz .legend .k.msg{background:#f0b429}
+.article .rfviz .legend .k.car{background:#6f7a93}
+.article .rfviz .legend .k.mod{background:#7d97ff}
+@media (max-width:620px){ .article .rfviz canvas{height:190px} }

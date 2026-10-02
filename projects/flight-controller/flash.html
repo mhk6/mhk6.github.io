@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: Blackbox flash — Mohak Dua</title>
+  <meta name="description" content="A 16 MB SPI NOR flash for blackbox logging, on its own bus away from the gyro, with pull-ups parking the control pins." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">FLASH</div>
+    <ol>
+      <li><a href="#why">01 Why a separate chip</a></li>
+      <li><a href="#pullups">02 Parking the control pins</a></li>
+      <li><a href="#bus">03 Its own bus</a></li>
+      <li><a href="#clock">04 Clock ceiling</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>Blackbox flash</h1>
+    <p class="tech">W25Q128JV · 16 MB · SPI3 · SOIC-8</p>
+
+    <p class="lead">The flight data recorder. Betaflight streams gyro rates, setpoints, PID terms and motor outputs to this chip while you fly, and afterwards you open the log and see what the quad actually did.</p>
+
+    <ul class="toc">
+      <li><a href="#why">01 Why a separate chip</a></li>
+      <li><a href="#pullups">02 Control pins</a></li>
+      <li><a href="#bus">03 Its own bus</a></li>
+      <li><a href="#clock">04 Clock ceiling</a></li>
+    </ul>
+
+    <p>It's the smallest block on the board: one flash IC, one decoupling capacitor, and three pull-up resistors. Almost all of the thinking went into the resistors, because this part fails quietly.</p>
+
+    <h2 id="why"><span class="num">01</span>Why a separate chip</h2>
+    <p>The STM32 has its own flash, and it's the wrong place for this. Logging at up to 8 kHz writes tens of fields thousands of times a second. Interleaving that into program flash would disturb the control loop, and the MCU's flash is neither sized nor wear-rated for it.</p>
+
+    <p>A dedicated part gives 16 MB and 100,000 erase cycles per sector, which is minutes of full-rate logging and effectively unlimited reuse. Betaflight's own guideline is at least 8 MB, so this is one size up from the floor.</p>
+
+    <p>Logs are how you tune. You chase an oscillation, find a desync, or work out why it fell out of the sky by reading what the gyro and the motors were doing at the time. Without one, tuning is guesswork.</p>
+
+    <h2 id="pullups"><span class="num">02</span>Parking the control pins</h2>
+    <p class="stakes">Two floating pins here don't stop the chip working. They make it corrupt a log occasionally.</p>
+
+    <p>Three of the chip's pins are active-low controls, and all three get a 10 kΩ pull-up.</p>
+
+    <table class="spec">
+      <tr><th>Pin</th><th>Function</th><th>What happens floating</th></tr>
+      <tr><td>Write protect</td><td>blocks writes to the status register</td><td>a noise glitch silently write-protects the chip</td></tr>
+      <tr><td>Hold</td><td>pauses a transaction mid-transfer</td><td>a glitch truncates a write and corrupts the log</td></tr>
+      <tr><td>Chip select</td><td>selects the device</td><td>the chip can be selected while the MCU is still booting</td></tr>
+    </table>
+
+    <p>The first two are the datasheet's explicit instruction: if you aren't using them, tie them high through a pull-up. The datasheet says nothing about the chip-select pull-up, but the STM32's pins are tri-stated during reset, which leaves a window where nothing drives the line and the flash could believe it's being addressed. One resistor closes it.</p>
+
+    <p>These are worth designing out because they don't reproduce. A dead chip gets found on the bench, while a chip that corrupts one log in thirty gets blamed on the software.</p>
+
+    <h2 id="bus"><span class="num">03</span>Its own bus</h2>
+    <p>The flash sits on SPI3 and the gyro has SPI1 to itself. Betaflight requires that: a blocking SPI bus can't be shared between the blackbox and another blocking device.</p>
+
+    <p>The reason is scheduling. The gyro read is the single most timing-critical transaction on the board, and it has to happen on a fixed beat locked to the sensor's data-ready interrupt. A blackbox write is bulk traffic that can take as long as it likes. Put them on one bus and the log occasionally delays the thing the whole flight loop waits on.</p>
+
+    <p>So the cost of a separate bus is three more MCU pins, and what it buys is that logging can never interfere with flying.</p>
+
+    <h2 id="clock"><span class="num">04</span>Clock ceiling</h2>
+    <p>The flash is rated to 133 MHz, which is irrelevant here. The limit is the MCU. SPI3 sits on the slower of the STM32's two peripheral buses, and the fastest a hardware SPI can run is half its bus clock.</p>
+
+    <div class="eq">
+      <span class="given">SPI3 is on APB1, which tops out at 42 MHz</span>
+      <math display="block"><mrow><msub><mi>f</mi><mrow><mi>max</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>f</mi><mrow><mi>PCLK</mi></mrow></msub><mn>2</mn></mfrac><mo>=</mo><mrow class="res"><mn>21</mn><mtext>&#8201;MHz</mtext></mrow></mrow></math>
+      <span class="note">A sixth of what the chip could take, so the part is nowhere near being the bottleneck.</span>
+    </div>
+
+    <p>Worth working out. The part's headline number invites you to design around 133 MHz and then find the bus can't get near it.</p>
+
+    <details>
+      <summary>What swapping the part would cost</summary>
+      <p>Halving the capacity is free. The 8 MB version is a drop-in on the same footprint, meets Betaflight's stated minimum exactly, and costs less.</p>
+      <p>Doubling it isn't. The 32 MB part has no option in this package at all, only a leadless one that needs hot air or a physically larger wide-body package. Since hand-solderability is a first-class constraint on this board, that rules it out, and the capacity here is already generous for the job.</p>
+    </details>
+
+    <div class="pager">
+      <a href="sensors.html">&#8592; Sensors</a>
+      <a href="radio.html">Radio &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+</body>
+</html>

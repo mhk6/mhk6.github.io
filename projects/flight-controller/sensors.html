@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: Sensors — Mohak Dua</title>
+  <meta name="description" content="The ICM-42688-P gyro and DPS310 barometer: clean supply, decoupling, the data-ready interrupt, placement, and the I2C bus." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">SENSORS</div>
+    <ol>
+      <li><a href="#gyro">01 Gyro</a></li>
+      <li><a href="#supply">02 Supply and decoupling</a></li>
+      <li><a href="#interrupt">03 Data-ready interrupt</a></li>
+      <li><a href="#placement">04 Placement</a></li>
+      <li><a href="#baro">05 Barometer</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>Sensors</h1>
+    <p class="tech">ICM-42688-P · DPS310 · SPI1 · I2C1</p>
+
+    <p class="lead">Two sensors on this sheet, with very different requirements. The gyro is the one the flight loop can't fly without, so most of the design effort goes there. The barometer measures altitude and can afford to sit on a shared bus.</p>
+
+    <ul class="toc">
+      <li><a href="#gyro">01 Gyro</a></li>
+      <li><a href="#supply">02 Supply</a></li>
+      <li><a href="#interrupt">03 Interrupt</a></li>
+      <li><a href="#placement">04 Placement</a></li>
+      <li><a href="#baro">05 Barometer</a></li>
+    </ul>
+
+    <table class="spec">
+      <tr><th>Part</th><th>Measures</th><th>Bus</th><th>Rail</th></tr>
+      <tr><td>ICM-42688-P</td><td>rotation rate and acceleration</td><td>SPI1, up to 24 MHz</td><td>3.3 V analog</td></tr>
+      <tr><td>DPS310</td><td>air pressure, so altitude</td><td>I2C1 at 0x77</td><td>3.3 V digital</td></tr>
+      <tr><td>Compass pads</td><td>heading, if fitted</td><td>I2C1, shared</td><td>3.3 V digital</td></tr>
+    </table>
+
+    <h2 id="gyro"><span class="num">01</span>Gyro</h2>
+    <p class="stakes">A multirotor is aerodynamically unstable. Without the gyro it doesn't fly badly, it tumbles.</p>
+
+    <p>Left alone, a quad immediately starts to rotate. It stays in the air only by measuring its own rotation thousands of times a second and correcting with the motors before the tumble grows. Every other part on this board can fail and you can still land. If the gyro stops, you can't.</p>
+
+    <p>The ICM-42688-P is a 6-axis part: three axes of gyroscope giving angular rate, which is the flight-critical signal, and three of accelerometer giving the absolute direction of down. The gyro is fast but drifts, the accelerometer is slow but absolute, and the firmware fuses them.</p>
+
+    <p>Both are tiny vibrating silicon structures read out as a changing capacitance, which is what makes this a circuit problem rather than a part-placement problem. Anything that reaches the sensor as electrical noise, supply ripple, ground bounce or SPI crosstalk, comes out the other side as rotation that didn't happen. The PID loop then amplifies it, the D-term especially, into motor jitter and heat.</p>
+
+    <h2 id="supply"><span class="num">02</span>Supply and decoupling</h2>
+    <p>The gyro runs off the dedicated low-noise regulator covered on the <a href="power.html">Power page</a>, not the digital rail. Both its supply pins, VDD and VDDIO, come off that rail.</p>
+
+    <p>Decoupling is exactly what the datasheet's own bill of materials asks for, which is worth following to the letter on a part this sensitive:</p>
+
+    <table class="spec">
+      <tr><th>Pin</th><th>Capacitor</th><th>Note</th></tr>
+      <tr><td>VDD</td><td>100 nF</td><td>high-frequency bypass, closest to the pin</td></tr>
+      <tr><td>VDD</td><td>2.2 µF</td><td>bulk, just outboard of it</td></tr>
+      <tr><td>VDDIO</td><td>10 nF</td><td>at the pin</td></tr>
+    </table>
+
+    <p>Two pins get tied off deliberately. Pin 7 is marked reserved and the datasheet requires it be grounded, which is easy to miss because a reserved pin usually means leave it alone. Pin 9 is the second interrupt, unused here, so it goes to ground as the datasheet specifies.</p>
+
+    <p>Chip select gets a 10 kΩ pull-up to the same rail, so the line is high while the MCU's pins are still floating during boot.</p>
+
+    <details>
+      <summary>Why the pull-up isn't a direct tie</summary>
+      <p>The part decides between SPI and I2C by what it sees on chip select at startup. A pull-up holds it high through boot and still lets the MCU pull it low to talk. Tying it directly to the rail would hold it high permanently, which selects I2C and makes the SPI bus unreachable. The schematic check has an explicit rule asserting chip select is not the same net as the rail, because the two look nearly identical on a schematic and behave completely differently.</p>
+    </details>
+
+    <h2 id="interrupt"><span class="num">03</span>Data-ready interrupt</h2>
+    <p>The gyro's interrupt line goes to an external-interrupt-capable pin on the STM32. The part streams samples at up to 8 kHz, so a new one lands every 125 µs.</p>
+
+    <div class="eq">
+      <math display="block"><mrow><mi>T</mi><mo>=</mo><mfrac><mn>1</mn><mrow><mn>8</mn><mtext>&#8201;kHz</mtext></mrow></mfrac><mo>=</mo><mrow class="res"><mn>125</mn><mtext>&#8201;µs</mtext></mrow></mrow></math>
+      <span class="note">One sample period. The interrupt fires the instant each sample latches.</span>
+    </div>
+
+    <p>Without that line the driver falls back to polling, which means guessing when the next sample is ready. Read too early and you get the previous sample again, read too late and you add delay. Worse, the delay varies, and a control loop handles a fixed delay far better than a changing one.</p>
+
+    <p>With the interrupt wired, the SPI read is triggered by the edge and runs on DMA, so sampling is locked to the sensor and the whole PID loop runs on that 125 µs beat. Betaflight's guidance is to route and declare an interrupt pin for every gyro, and omitting it costs you both DMA and synchronisation.</p>
+
+    <h2 id="placement"><span class="num">04</span>Placement</h2>
+    <p>This part of the design happens during layout, so what follows is a set of constraints to carry forward.</p>
+
+    <ul>
+      <li>Near the mechanical centre of the board, which keeps frame vibration from acting through a lever arm on the accelerometer.</li>
+      <li>On the side facing away from the ESC stack, and away from the buck's switch node and the motor-current copper.</li>
+      <li>Solid ground plane directly underneath, with no splits and no high-current return crossing under the package.</li>
+      <li>Clear of the mounting holes, because screw torque and board flex transmit into the die and shift the bias.</li>
+      <li>Each decoupling capacitor grounded with its own via at the pad, to keep the current loop small.</li>
+    </ul>
+
+    <p>The rotation the part is placed at gets encoded in the firmware's alignment setting, so the placement should land on a clean 90 degree multiple to keep that configuration trivial.</p>
+
+    <h2 id="baro"><span class="num">05</span>Barometer</h2>
+    <p>A barometer measures static air pressure, and pressure falls with height, so firmware converts it to metres with the barometric formula.</p>
+
+    <div class="eq">
+      <math display="block"><mrow><mi>h</mi><mo>=</mo><mfrac><msub><mi>T</mi><mn>0</mn></msub><mi>L</mi></mfrac><mrow><mo>[</mo><mn>1</mn><mo>&#8722;</mo><msup><mrow><mo>(</mo><mfrac><mi>P</mi><msub><mi>P</mi><mn>0</mn></msub></mfrac><mo>)</mo></mrow><mfrac><mrow><mi>R</mi><mi>L</mi></mrow><mrow><mi>g</mi><mi>M</mi></mrow></mfrac></msup><mo>]</mo></mrow></mrow></math>
+      <span class="note">P is what the chip reads, P<sub>0</sub> is the pressure captured at arm, so the result is height above launch rather than above sea level.</span>
+    </div>
+
+    <p>That's why absolute accuracy barely matters here. Altitude hold works by keeping the current pressure equal to the pressure from a second ago, so what counts is short-term precision and a low noise floor. The DPS310 gives about ±0.06 hPa of relative precision, roughly half a metre, and that's what it was chosen for over the cheaper and more common alternative.</p>
+
+    <p>It sits on I2C rather than its own SPI bus because it's read slowly and nothing depends on it cycle to cycle. Two pins are strapped: chip select high to force I2C mode, since a low there selects SPI, and the address pin high to put it at 0x77.</p>
+
+    <details>
+      <summary>Sizing the bus pull-ups</summary>
+      <p>An I2C line is pulled low actively and high only by a resistor, so the pull-up and the bus capacitance set the rise time. Too large a resistor and the edge is too slow for the clock; too small and the device can't pull the line low enough.</p>
+      <div class="eq">
+        <span class="given">rise time against bus capacitance</span>
+        <math display="block"><mrow><msub><mi>t</mi><mi>r</mi></msub><mo>&#8776;</mo><mn>0.85</mn><mo>&#8901;</mo><msub><mi>R</mi><mi>p</mi></msub><mo>&#8901;</mo><msub><mi>C</mi><mi>b</mi></msub></mrow></math>
+        <span class="note">Fitted <span class="res">4.7 kΩ</span>, one pair for the whole bus, comfortable at 100 kHz. At 400 kHz the value drops to about 2.2 kΩ.</span>
+      </div>
+      <p>One pair of resistors serves the bus, not one pair per device. Worth knowing for the compass pads: most external compass and GPS modules carry their own pull-ups, so plugging one in puts a second pair in parallel and roughly halves the effective resistance.</p>
+    </details>
+
+    <div class="pager">
+      <a href="mcu.html">&#8592; MCU</a>
+      <a href="flash.html">Blackbox flash &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+</body>
+</html>

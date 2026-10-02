@@ -22,24 +22,80 @@
     </div>
   </nav>
 
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">FLIGHT CONTROLLER</div>
+    <ol>
+      <li><a href="flight-controller/power.html">Power</a></li>
+      <li><a href="flight-controller/mcu.html">MCU</a></li>
+      <li><a href="flight-controller/sensors.html">Sensors</a></li>
+      <li><a href="flight-controller/flash.html">Blackbox flash</a></li>
+      <li><a href="flight-controller/radio.html">Radio</a></li>
+      <li><a href="flight-controller/usb.html">USB</a></li>
+      <li><a href="flight-controller/io.html">Connectors and IO</a></li>
+    </ol>
+  </nav>
+
   <article class="article">
     <a class="back" href="../projects.html">&#8592; Projects</a>
     <h1 style="view-transition-name:t-fc">ELRS Flight Controller</h1>
     <p class="tech">KiCad · STM32F405 · ExpressLRS · Betaflight</p>
 
-    <p>A four-layer flight controller for a 5-inch quadcopter, with a 2.4 GHz ExpressLRS receiver built right onto the board instead of hanging off it as a separate module.</p>
+    <p class="lead">A four-layer flight controller for a 5-inch quadcopter, designed from a blank schematic in KiCad. The part most boards leave to a plug-in module, the 2.4 GHz ExpressLRS receiver, is on the board itself, so the radio and its antenna match are part of the design instead of something bolted on afterward.</p>
 
-    <h2>Why this one</h2>
-    <p>I want to build a full drone at some point, so I started with the brains of it: a flight controller with the sensors and the radio on one board. It's built around an STM32F405 running Betaflight, with an ICM-42688-P gyro, a blackbox flash chip for logging, and its own power tree that takes up to a 6S battery.</p>
+    <p>I picked every part, worked out the values against the datasheets, and drew the whole thing myself across nine sheets. It runs Betaflight on an STM32F405, which is the constraint that shapes most of the rest of the board.</p>
+
+    <h2>Sections</h2>
+    <p>Each block of the design, with the parts, the numbers behind them, and the decisions that changed along the way.</p>
+    <div class="subpages">
+      <a class="subpage" href="flight-controller/power.html">
+        <div class="name">Power <span class="arrow">&#8594;</span></div>
+        <div class="desc">Input protection, the 60 V buck to 5 V, and two separate 3.3 V rails.</div>
+      </a>
+      <a class="subpage" href="flight-controller/mcu.html">
+        <div class="name">MCU <span class="arrow">&#8594;</span></div>
+        <div class="desc">The STM32F405 support circuit, the clock tree, and the Betaflight pin map.</div>
+      </a>
+      <a class="subpage" href="flight-controller/sensors.html">
+        <div class="name">Sensors <span class="arrow">&#8594;</span></div>
+        <div class="desc">The gyro's clean supply and data-ready interrupt, and the barometer on I2C.</div>
+      </a>
+      <a class="subpage" href="flight-controller/flash.html">
+        <div class="name">Blackbox flash <span class="arrow">&#8594;</span></div>
+        <div class="desc">16 MB of logging on its own SPI bus, kept away from the gyro's.</div>
+      </a>
+      <a class="subpage" href="flight-controller/radio.html">
+        <div class="name">Radio <span class="arrow">&#8594;</span></div>
+        <div class="desc">The on-board ExpressLRS receiver, the 2.4 GHz match, and where the tuning actually happens.</div>
+      </a>
+      <a class="subpage" href="flight-controller/usb.html">
+        <div class="name">USB <span class="arrow">&#8594;</span></div>
+        <div class="desc">The sink handshake, ESD at the connector, and one diode so it runs with no battery.</div>
+      </a>
+      <a class="subpage" href="flight-controller/io.html">
+        <div class="name">Connectors and IO <span class="arrow">&#8594;</span></div>
+        <div class="desc">Six headers, the 5 V LED shifter, the buzzer driver and the indicator LEDs.</div>
+      </a>
+    </div>
 
     <figure>
       <img src="../assets/img/fc-schematic.png" alt="KiCad schematic of the flight controller: STM32F405 core, ICM-42688-P gyro, VDDA filtering, and blackbox flash." />
-      <figcaption>The schematic in KiCad: STM32F405 core, ICM-42688-P gyro, VDDA filtering, and blackbox flash.</figcaption>
+      <figcaption>Part of the schematic in KiCad: the STM32F405 core, the ICM-42688-P gyro, and the blackbox flash.</figcaption>
     </figure>
 
-    <h2>First RF, first four layers</h2>
-    <p>This one was a big step up for me. It's my first four-layer board, so I got to learn what the extra planes actually get you and get comfortable routing with them.</p>
-    <p>It's also my first real RF design. Having the receiver on the board meant the antenna match and the RF layout were on me to get right. It was the first time I designed to a controlled target impedance, instead of just routing it and hoping it works, which I could get away with on USB 2.0 full-speed.</p>
+    <h2>Power</h2>
+    <p>The board takes pack voltage off the ESC ribbon, so it has to survive anything from 2S to 6S. Input protection, a 60 V buck down to 5 V, and two separate 3.3 V regulators, one of which exists only to give the gyro a quiet supply.</p>
+
+    <h2>Flight loop</h2>
+    <p>The STM32F405 reads the gyro over its own SPI bus and drives four DShot motor outputs off timer pins. Betaflight expects specific peripherals on specific pins, so the pin map came out of working backwards from what the firmware needs and checking each assignment against the alternate-function tables. An ICM-42688-P handles rotation and acceleration, with a DPS310 barometer and external compass pads on I2C.</p>
+
+    <h2>Integrated ExpressLRS receiver</h2>
+    <p>An SX1280 does the 2.4 GHz radio and an ESP8285 runs the ExpressLRS firmware over SPI, with CRSF back to the STM32 on a UART. Putting the receiver on the board rather than on a module means the RF match, the crystal and the antenna are part of this design. The match follows Semtech's reference, and the stack-up is signal, ground, ground, signal so the RF run keeps a solid reference plane.</p>
+
+    <h2>Logging and setup</h2>
+    <p>A 16 MB flash chip records blackbox logs on a separate SPI bus from the gyro, so logging can't interfere with the sensor the flight loop reads every cycle. Configuration and firmware go over USB-C, with an ESD array on the data pair and a divider that tells the MCU whether it's on USB or on a battery.</p>
+
+    <h2>Everything that plugs into it</h2>
+    <p>Four motor signal pads carry DShot out to the ESCs. The board commands the motors but never sources their current, which keeps the high-current path off it entirely. The rest of the edge is a header per peripheral: GPS and video transmitter on their own UARTs, a WS2812 strip behind a 5 V level shifter, a buzzer on a transistor driver, and battery sense into an ADC pin.</p>
 
     <div class="pager">
       <a href="fpga-instrument.html">&#8592; FPGA Instrument</a>
@@ -56,5 +112,6 @@
 
 </div>
 <script src="../assets/js/main.js"></script>
+<script src="../assets/js/outline.js"></script>
 </body>
 </html>

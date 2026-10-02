@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: Connectors and IO — Mohak Dua</title>
+  <meta name="description" content="The board edge: six headers, a 5 V level shifter for the LED strip, a buzzer driver, and two indicator LEDs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">CONNECTORS &amp; IO</div>
+    <ol>
+      <li><a href="#headers">01 The board edge</a></li>
+      <li><a href="#esc">02 The ESC ribbon</a></li>
+      <li><a href="#shifter">03 LED level shifter</a></li>
+      <li><a href="#buzzer">04 Buzzer driver</a></li>
+      <li><a href="#leds">05 Indicator LEDs</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>Connectors and IO</h1>
+    <p class="tech">6 headers · 74AHCT1G125 · S8050 · WS2812</p>
+
+    <p class="lead">Everything that leaves the board, plus the three small driver circuits that make the outputs usable. Nothing here is complicated on its own, which is exactly why the mistakes in it are easy to make.</p>
+
+    <ul class="toc">
+      <li><a href="#headers">01 Headers</a></li>
+      <li><a href="#esc">02 ESC ribbon</a></li>
+      <li><a href="#shifter">03 Level shifter</a></li>
+      <li><a href="#buzzer">04 Buzzer</a></li>
+      <li><a href="#leds">05 LEDs</a></li>
+    </ul>
+
+    <h2 id="headers"><span class="num">01</span>The board edge</h2>
+    <p>Six headers, each carrying its own supply so a peripheral needs one connector and not two.</p>
+
+    <table class="spec">
+      <tr><th>Header</th><th>Pins</th><th>For</th></tr>
+      <tr><td>ESC</td><td>8</td><td>battery in, four motor signals, current sense, telemetry</td></tr>
+      <tr><td>GPS</td><td>6</td><td>5 V, a UART, and the I2C bus for an external compass</td></tr>
+      <tr><td>VTX</td><td>4</td><td>5 V and a UART for the video transmitter</td></tr>
+      <tr><td>Spare UART</td><td>4</td><td>5 V and a third serial port</td></tr>
+      <tr><td>LED</td><td>3</td><td>5 V, shifted data, ground</td></tr>
+      <tr><td>SWD</td><td>5</td><td>debug, 3.3 V rather than 5 V</td></tr>
+    </table>
+
+    <p>The GPS header carries the I2C lines as well as its UART, because a compass almost always arrives bolted to the GPS module. One plug, both functions.</p>
+
+    <h2 id="esc"><span class="num">02</span>The ESC ribbon</h2>
+    <p class="stakes">This connector is where the battery enters the board, on a header you can physically plug in backwards.</p>
+
+    <p>The eight-pin ribbon to the four-in-one ESC carries the four motor signals out, current sense and telemetry back, and pack voltage in. That last one makes it the second battery entry point on the board, alongside the keyed battery connector.</p>
+
+    <p>That matters because it's a bare 2.54 mm header with no keying, so it can go in reversed or offset by a pin. It's the reason the input protection on the <a href="power.html">Power page</a> uses a bidirectional TVS: a unidirectional one would short a reversed pack through itself.</p>
+
+    <p>Every commercial flight controller has the same eight-pin header with the same exposure. Keying it was considered and rejected, because plain header stock is a first-class requirement on a board meant to be hand-soldered.</p>
+
+    <h2 id="shifter"><span class="num">03</span>LED level shifter</h2>
+    <p>An addressable LED strip runs on 5 V and reads its data line against that supply. It needs 70 percent of it to register a logic high.</p>
+
+    <div class="eq">
+      <math display="block"><mrow><msub><mi>V</mi><mrow><mi>IH</mi></mrow></msub><mo>=</mo><mn>0.7</mn><mo>&#215;</mo><mn>5</mn><mtext>&#8201;V</mtext><mo>=</mo><mrow class="res"><mn>3.5</mn><mtext>&#8201;V</mtext></mrow></mrow></math>
+      <span class="note">The STM32 drives 3.3 V, so it never gets there. The strip either misreads data or works until it's cold.</span>
+    </div>
+
+    <p>So the data line goes through a single-gate buffer powered from 5 V. The part is specifically an AHCT type, because its inputs are referenced to TTL levels rather than to its own supply. It calls anything above 2 V a high, so 3.3 V clears it by 1.3 V, and its output swings to the full 5 V the strip wants.</p>
+
+    <p>That distinction is the whole reason for the part choice. The otherwise identical AHC version would want 3.5 V on its input and the circuit wouldn't work at all.</p>
+
+    <details>
+      <summary>Two details on the output side</summary>
+      <p>A 499 Ω resistor sits in series with the buffer's output, which the strip's datasheet asks for at the first LED. Against the roughly 15 pF of input capacitance that gives a 7.5 ns time constant, against a bit time of 1.25 µs. It rounds the edge without touching the data.</p>
+      <p>The input and output are also deliberately different net names, and the schematic check asserts they never merge. They sit on opposite sides of the buffer, and if they ever end up on one net the shifter is bypassed. Nothing in a rule check would notice, because a wire from the MCU straight to the header is perfectly legal and simply doesn't work.</p>
+    </details>
+
+    <h2 id="buzzer"><span class="num">04</span>Buzzer driver</h2>
+    <p>The buzzer draws more than a GPIO pin should source, so it's switched by a small transistor. The base resistor sets how hard that transistor is driven.</p>
+
+    <div class="eq">
+      <span class="given">30 mA through the buzzer, worst-case gain of 120</span>
+      <math display="block"><mrow><msub><mi>I</mi><mi>B</mi></msub><mo>=</mo><mfrac><mrow><mn>3.3</mn><mo>&#8722;</mo><mn>0.7</mn></mrow><mrow><mn>1</mn><mtext>&#8201;k&#937;</mtext></mrow></mfrac><mo>=</mo><mn>2.6</mn><mtext>&#8201;mA</mtext><mo>,</mo><mspace width="0.6em"/><mtext>against</mtext><mspace width="0.4em"/><mfrac><mrow><mn>30</mn><mtext>&#8201;mA</mtext></mrow><mn>120</mn></mfrac><mo>=</mo><mrow class="res"><mn>0.25</mn><mtext>&#8201;mA</mtext></mrow><mspace width="0.4em"/><mtext>needed</mtext></mrow></math>
+      <span class="note">Ten times more base current than the minimum, so it stays saturated across the gain spread and over temperature.</span>
+    </div>
+
+    <p>The gain figure comes from the datasheet's lowest bin. Transistor gain varies by a factor of three between parts of the same order code, so sizing against the typical value gives a circuit that works on most boards.</p>
+
+    <p>A 10 kΩ resistor from base to ground holds the transistor off while the MCU's pins are still floating during boot, which is what stops the buzzer chirping every time the board powers up. It only steals 0.07 mA of the 2.6.</p>
+
+    <p>There's also a diode across the buzzer with its band to the 5 V rail. A buzzer is a coil, and interrupting current through a coil produces a voltage spike in the opposite direction. The diode gives that energy somewhere to go and clamps the transistor's collector to about 5.7 V. Fitted backwards it shorts the 5 V rail every time the buzzer turns on, which is why the orientation is called out explicitly in the build notes.</p>
+
+    <h2 id="leds"><span class="num">05</span>Indicator LEDs</h2>
+    <p>Two LEDs, each with a series resistor sized for about 2 mA.</p>
+
+    <div class="eq">
+      <math display="block"><mrow><mi>R</mi><mo>=</mo><mfrac><mrow><msub><mi>V</mi><mrow><mi>supply</mi></mrow></msub><mo>&#8722;</mo><msub><mi>V</mi><mi>f</mi></msub></mrow><msub><mi>I</mi><mi>f</mi></msub></mfrac></mrow></math>
+      <span class="note">1.5 kΩ on the 5 V rail and 680 Ω on 3.3 V, both landing near 2 mA for a red LED.</span>
+    </div>
+
+    <p>The power LED sits on the 5 V rail on purpose. It's downstream of the buck, so if it lights the converter is running, which makes it a one-glance check that the first stage of the power tree came up.</p>
+
+    <p>The status LED is on a GPIO and does whatever the firmware wants with it.</p>
+
+    <div class="pager">
+      <a href="usb.html">&#8592; USB</a>
+      <a href="../flight-controller.html">Flight Controller &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+</body>
+</html>

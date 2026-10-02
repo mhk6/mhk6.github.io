@@ -55,7 +55,8 @@
     </figure>
 
     <h2>Where the keys live</h2>
-    <p>The main design decision was keeping the private keys out of the microcontroller's flash. They're stored in an ATECC608B secure element, a tamper-resistant chip that generates and stores ECC keys and never gives them back out. The STM32L4 handles USB and asks the secure element to sign things, but it never actually sees the keys. That's the same approach real security keys use, and it's a lot safer than keeping the keys in the STM32's flash.</p>
+    <p>The main design decision was keeping the private keys out of the microcontroller's flash. They sit in an ATECC608B secure element instead, a tamper-resistant chip that generates ECC keys on board and will sign with them but never hand them back. The STM32L4 runs USB and asks the secure element to sign things. It never sees a key.</p>
+    <p>So reading out the STM32's flash gets you nothing, which is why commercial keys are built the same way.</p>
 
     <figure>
       <img src="../assets/img/gokey-assembled-clean.jpg" alt="The assembled GoKey board with USB-C, an STM32L4, a secure element, and USER and RST buttons." />
@@ -63,7 +64,7 @@
     </figure>
 
     <h2>Layout and assembly</h2>
-    <p>Everything had to fit on a two-layer board about the size of a keyring, so most of the layout work went into the power and decoupling network. I assembled the first units by hand, using hot-air reflow for the STM32L4's QFN package and micro-soldering for the USB-C connector.</p>
+    <p>Everything had to fit on a two-layer board about the size of a keyring. Most of the layout work went into the power and decoupling network, since that's what suffers first when the area runs out. I assembled the first units by hand, using hot-air reflow for the STM32L4's QFN package and micro-soldering for the USB-C connector.</p>
 
     <figure>
       <img src="../assets/img/gokey-pcb.png" alt="The two-layer copper layout of the GoKey board in Altium." />

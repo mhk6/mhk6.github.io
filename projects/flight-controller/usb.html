@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: USB — Mohak Dua</title>
+  <meta name="description" content="USB-C on the flight controller: the sink handshake, ESD clamping, VBUS sensing, and an OR diode so the board runs on bench power." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">USB</div>
+    <ol>
+      <li><a href="#jobs">01 What the port is for</a></li>
+      <li><a href="#handshake">02 The sink handshake</a></li>
+      <li><a href="#data">03 Data lines</a></li>
+      <li><a href="#esd">04 ESD</a></li>
+      <li><a href="#sense">05 Knowing it's plugged in</a></li>
+      <li><a href="#orpath">06 Running on bench power</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>USB</h1>
+    <p class="tech">USB-C · USB 2.0 full speed · USBLC6-2SC6 · B0530W</p>
+
+    <p class="lead">One USB-C port does configuration, firmware updates and bench power. The interesting parts are the handshake that makes a USB-C host turn its power on at all, and the single diode that lets the board run with no battery attached.</p>
+
+    <ul class="toc">
+      <li><a href="#jobs">01 What it's for</a></li>
+      <li><a href="#handshake">02 Handshake</a></li>
+      <li><a href="#data">03 Data</a></li>
+      <li><a href="#esd">04 ESD</a></li>
+      <li><a href="#sense">05 VBUS sense</a></li>
+      <li><a href="#orpath">06 Bench power</a></li>
+    </ul>
+
+    <div class="diagram">
+      <svg viewBox="0 0 700 200" role="img" aria-label="USB-C port feeding an ESD clamp, then the data lines to the MCU and VBUS through an OR diode to the 5 V rail.">
+        <text class="hd" x="0" y="12">USB PATH</text>
+
+        <g>
+          <rect class="bx" x="0" y="74" width="118" height="52" />
+          <rect class="bar" x="0" y="74" width="3" height="52" />
+          <text class="ttl" x="14" y="96">USB-C</text>
+          <text class="sub" x="14" y="112">receptacle</text>
+        </g>
+        <path class="ln" d="M118 100 H158" />
+        <path class="ln" d="M152 95 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="158" y="74" width="126" height="52" />
+          <rect class="bar" x="158" y="74" width="3" height="52" />
+          <text class="ttl" x="172" y="96">ESD clamp</text>
+          <text class="sub" x="172" y="112">USBLC6-2SC6</text>
+        </g>
+
+        <path class="ln" d="M284 100 H318 M318 42 V158 M318 42 H352 M318 158 H352" />
+        <path class="ln" d="M346 37 l6 5 l-6 5 M346 153 l6 5 l-6 5" />
+        <text class="sub" x="290" y="92">D&#177;</text>
+
+        <g>
+          <rect class="bx" x="352" y="16" width="180" height="52" />
+          <rect class="bar" x="352" y="16" width="3" height="52" />
+          <text class="ttl" x="366" y="38">STM32 USB</text>
+          <text class="sub" x="366" y="54">0 &#937; series, no resistors fitted</text>
+        </g>
+
+        <g>
+          <rect class="bx" x="352" y="132" width="142" height="52" />
+          <rect class="bar" x="352" y="132" width="3" height="52" />
+          <text class="ttl" x="366" y="154">OR diode</text>
+          <text class="sub" x="366" y="170">B0530W</text>
+        </g>
+        <path class="ln" d="M494 158 H534" />
+        <path class="ln" d="M528 153 l6 5 l-6 5" />
+        <g>
+          <rect class="bx" x="534" y="132" width="166" height="52" />
+          <rect class="bar" x="534" y="132" width="3" height="52" />
+          <text class="volt" x="548" y="154">5 V rail</text>
+          <text class="sub" x="548" y="170">shared with the buck</text>
+        </g>
+      </svg>
+    </div>
+
+    <h2 id="jobs"><span class="num">01</span>What the port is for</h2>
+    <p>Three jobs, and they shape everything else on the sheet.</p>
+
+    <table class="spec">
+      <tr><th>Job</th><th>What it needs</th></tr>
+      <tr><td>Configuration</td><td>a serial port over USB, for the Betaflight configurator</td></tr>
+      <tr><td>Firmware</td><td>the STM32's built-in DFU bootloader, entered with the boot button</td></tr>
+      <tr><td>Bench power</td><td>VBUS reaching the 5 V rail without a battery connected</td></tr>
+    </table>
+
+    <p>The third one is why this sheet has a diode on it. A host port supplies well over the board's 185 mA of silicon, so the whole thing runs on USB alone for setting up and calibrating. The motors can't spin while it does, because the ESCs are off-board and on battery power, which is exactly what you want on a bench.</p>
+
+    <p>Debug access is separate. Firmware goes on over DFU, so the SWD header exists only for stepping through code, which isn't something you do with release firmware.</p>
+
+    <h2 id="handshake"><span class="num">02</span>The sink handshake</h2>
+    <p class="stakes">Miss these two resistors and the port is dead. The host never turns VBUS on.</p>
+
+    <p>USB-C doesn't just connect power to the pins. The host puts a pull-up on its configuration channel lines and waits to see them pulled down by whatever got plugged in. That pull-down is how a device says it's a sink and wants power. No pull-down, no attach detected, no VBUS.</p>
+
+    <p>So the port gets a 5.1 kΩ resistor from each configuration channel pin to ground. Two of them, one per pin, and they are never tied together. The pins are what let the connector work either way up, and shorting them removes the host's ability to tell which orientation it's in.</p>
+
+    <p>The checker that runs over this schematic has an explicit rule asserting the two are on different nets, because tying them is an easy mistake that looks tidy on a schematic.</p>
+
+    <h2 id="data"><span class="num">03</span>Data lines</h2>
+    <p>USB-C carries a data pair on both sides of the connector so it works either way round, and this is a USB 2.0 device, so the two sides are simply tied together at the footprint.</p>
+
+    <p>Each line also has a series resistor footprint, and both are fitted with 0 Ω. Those resistors are conventional on USB designs, but ST's application note is explicit that the F405's full-speed PHY already drives at the impedance the spec asks for, so adding series resistance only makes things worse. The footprints stay because they cost nothing and give somewhere to put a real value if a board ever needs it.</p>
+
+    <h2 id="esd"><span class="num">04</span>ESD</h2>
+    <p>The data pair goes through a clamp array before it reaches the MCU. A USB connector is the one part of the board a person touches, and a static discharge from a hand is thousands of volts into a pin rated for 3.6.</p>
+
+    <p>The array sits right at the connector, so a strike is shunted to ground before it has any board to travel along. Its own supply pin ties to VBUS, which gives the clamp diodes the rail they clamp against.</p>
+
+    <h2 id="sense"><span class="num">05</span>Knowing it's plugged in</h2>
+    <p>The MCU needs to know a host is present, so it only powers up the USB peripheral and asserts its pull-up when there's something to talk to. VBUS is 5 V and the pin tolerates far less, so a divider scales it down.</p>
+
+    <p>Two constraints have to hold at once. The voltage has to stay under the pin's analog-safe limit even when the MCU is unpowered and a host is plugged in, and it has to stay above the threshold for a reliable logic high.</p>
+
+    <div class="eq">
+      <span class="given">5 V across 47 kΩ and 82 kΩ</span>
+      <math display="block"><mrow><msub><mi>V</mi><mrow><mi>sense</mi></mrow></msub><mo>=</mo><msub><mi>V</mi><mrow><mi>bus</mi></mrow></msub><mfrac><msub><mi>R</mi><mi>b</mi></msub><mrow><msub><mi>R</mi><mi>a</mi></msub><mo>+</mo><msub><mi>R</mi><mi>b</mi></msub></mrow></mfrac><mo>=</mo><mrow class="res"><mn>3.18</mn><mtext>&#8201;V</mtext></mrow></mrow></math>
+      <span class="note">Under the 3.6 V analog-safe ceiling with 420 mV to spare, and well over the 2.31 V needed for a logic high. Total 129 kΩ, so it draws 39 µA.</span>
+    </div>
+
+    <details>
+      <summary>Why not ST's own recommended values</summary>
+      <p>The application note suggests 33 kΩ over 82 kΩ, which gives 3.57 V. That clears the same 3.6 V ceiling by about 30 mV, which is inside the tolerance of the resistors themselves.</p>
+      <p>Shifting the top resistor to 47 kΩ moves it to 3.18 V and buys 420 mV of margin for the cost of nothing, since both values are standard and the current drops slightly too. The pin is five-volt tolerant in digital mode, so this margin is really protecting the option of reading it as an analog input later, where that tolerance doesn't apply.</p>
+    </details>
+
+    <h2 id="orpath"><span class="num">06</span>Running on bench power</h2>
+    <p>USB 5 V and the buck's 5 V are the same rail, which raises an obvious problem: with a battery connected the buck would push current back into the host's port, and with USB connected the host would be feeding the battery side of the board.</p>
+
+    <p>A single Schottky diode fixes both. Anode on the USB side, cathode on the rail, so current only ever flows into the board.</p>
+
+    <div class="eq">
+      <span class="given">about 0.3 V forward drop at bench current</span>
+      <math display="block"><mrow><msub><mi>V</mi><mrow><mi>rail</mi></mrow></msub><mo>=</mo><msub><mi>V</mi><mrow><mi>bus</mi></mrow></msub><mo>&#8722;</mo><msub><mi>V</mi><mi>f</mi></msub><mo>&#8776;</mo><mrow class="res"><mn>4.7</mn><mtext>&#8201;V</mtext></mrow></mrow></math>
+      <span class="note">Leaves 1.4 V across the 3.3 V regulators, comfortably above their dropout, so the rails hold on USB alone.</span>
+    </div>
+
+    <p>A passive diode is the right choice here even though it wastes a few hundred millivolts. Active OR-ing controllers exist to recover that drop in multi-amp paths, and this port supplies well under an amp for configuration only. The drop is irrelevant to the budget and the part is one component with nothing to go wrong.</p>
+
+    <div class="pager">
+      <a href="radio.html">&#8592; Radio</a>
+      <a href="io.html">Connectors and IO &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+</body>
+</html>

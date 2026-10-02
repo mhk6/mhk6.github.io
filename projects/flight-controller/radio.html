@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: Radio — Mohak Dua</title>
+  <meta name="description" content="The integrated 2.4 GHz ExpressLRS receiver: SX1280, ESP8285, the Semtech RF match, 50 ohm layout, and two antennas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">RADIO</div>
+    <ol>
+      <li><a href="#onboard">01 On the board</a></li>
+      <li><a href="#chips">02 The two chips</a></li>
+      <li><a href="#modulation">03 Getting bits onto a wave</a></li>
+      <li><a href="#match">04 The RF match</a></li>
+      <li><a href="#layout">05 Where the tuning happens</a></li>
+      <li><a href="#antennas">06 Two antennas</a></li>
+      <li><a href="#boot">07 Boot and flashing</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>Radio</h1>
+    <p class="tech">SX1280 · ESP8285 · ExpressLRS · 2.4 GHz</p>
+
+    <p class="lead">The receiver is on the board instead of plugged into it, so the radio, its match and its antennas are part of this design rather than someone else's.</p>
+
+    <ul class="toc">
+      <li><a href="#onboard">01 On the board</a></li>
+      <li><a href="#chips">02 The chips</a></li>
+      <li><a href="#modulation">03 Modulation</a></li>
+      <li><a href="#match">04 RF match</a></li>
+      <li><a href="#layout">05 Layout</a></li>
+      <li><a href="#antennas">06 Antennas</a></li>
+      <li><a href="#boot">07 Boot</a></li>
+    </ul>
+
+    <div class="diagram">
+      <svg viewBox="0 0 700 215" role="img" aria-label="Signal chain from the STM32 through the ESP8285 and SX1280 to the antenna.">
+        <text class="hd" x="0" y="12">CONTROL LINK</text>
+
+        <g>
+          <rect class="bx" x="0" y="40" width="104" height="52" />
+          <rect class="bar" x="0" y="40" width="3" height="52" />
+          <text class="ttl" x="14" y="62">STM32</text>
+          <text class="sub" x="14" y="78">flight loop</text>
+        </g>
+        <path class="ln" d="M104 66 H146" />
+        <path class="ln" d="M140 61 l6 5 l-6 5" />
+        <text class="sub" x="106" y="58">CRSF</text>
+
+        <g>
+          <rect class="bx" x="146" y="40" width="122" height="52" />
+          <rect class="bar" x="146" y="40" width="3" height="52" />
+          <text class="ttl" x="160" y="62">ESP8285</text>
+          <text class="sub" x="160" y="78">runs ExpressLRS</text>
+        </g>
+        <path class="ln" d="M268 66 H310" />
+        <path class="ln" d="M304 61 l6 5 l-6 5" />
+        <text class="sub" x="274" y="58">SPI</text>
+
+        <g>
+          <rect class="bx" x="310" y="40" width="114" height="52" />
+          <rect class="bar" x="310" y="40" width="3" height="52" />
+          <text class="ttl" x="324" y="62">SX1280</text>
+          <text class="sub" x="324" y="78">2.4 GHz radio</text>
+        </g>
+        <path class="ln" d="M424 66 H466" />
+        <path class="ln" d="M460 61 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="466" y="40" width="108" height="52" />
+          <rect class="bar" x="466" y="40" width="3" height="52" />
+          <text class="ttl" x="480" y="62">Match</text>
+          <text class="sub" x="480" y="78">Semtech ladder</text>
+        </g>
+        <path class="ln" d="M574 66 H616" />
+        <path class="ln" d="M610 61 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="616" y="40" width="84" height="52" />
+          <rect class="bar" x="616" y="40" width="3" height="52" />
+          <text class="volt" x="630" y="62">u.FL</text>
+          <text class="sub" x="630" y="78">pigtail</text>
+        </g>
+
+        <path class="ln" d="M207 92 V146 H262" />
+        <path class="ln" d="M256 141 l6 5 l-6 5" />
+        <text class="sub" x="214" y="120">WiFi</text>
+
+        <g>
+          <rect class="bx" x="262" y="120" width="204" height="52" />
+          <rect class="bar" x="262" y="120" width="3" height="52" />
+          <text class="ttl" x="276" y="142">PCB trace antenna</text>
+          <text class="sub" x="276" y="158">&#960;-match, config and updates only</text>
+        </g>
+      </svg>
+    </div>
+
+    <h2 id="onboard"><span class="num">01</span>On the board</h2>
+    <p>Most flight controllers leave a header for a receiver module and let someone else solve the radio. Putting it on the board means the 2.4 GHz path, the match, the crystal and the antenna launch all become part of this layout.</p>
+
+    <p>What it buys is a shorter signal path and one less thing hanging off the stack. What it costs is that the RF section now has to survive sharing a board with a switching regulator and four motor outputs, which is the reason the layout rules in section 04 are as strict as they are.</p>
+
+    <h2 id="chips"><span class="num">02</span>The two chips</h2>
+    <p>The SX1280 is the transceiver and does nothing on its own. The ESP8285 runs the ExpressLRS firmware, drives the SX1280 over SPI, and hands the decoded control channels to the STM32 over a single UART using the CRSF protocol.</p>
+
+    <p>So there are two microcontrollers on this board. The STM32 flies the quad and never touches the radio directly; the ESP handles the link and knows nothing about flight.</p>
+
+    <details>
+      <summary>The supply pin that isn't a supply pin</summary>
+      <p>The SX1280 has its own internal switching regulator, and its regulated supply input has to be fed from the converter's own feedback node, not from the 3.3 V rail. The datasheet says so in one line in a pin table, and it's easy to read the pin name and wire it to the obvious place.</p>
+      <p>Connecting it to 3.3 V instead would tie the output of the internal converter to the rail that feeds it. The wiring worksheet for this sheet carries a warning on that line, and the automated check has a rule asserting the two nets are separate, because a schematic where this is wrong looks completely normal.</p>
+    </details>
+
+    <h2 id="modulation"><span class="num">03</span>Getting bits onto a wave</h2>
+    <p>A 2.4 GHz carrier on its own carries no information. It's a sine wave sitting at one frequency. To send something you have to change it, and which property you change is the modulation scheme.</p>
+
+    <p>Analog radio changes the amplitude or the frequency continuously, which is AM and FM. A control link sends bits, so the carrier switches between a small number of fixed states instead of following a continuous signal. Shift the amplitude between two levels and that's ASK, shift the phase and that's PSK, shift the frequency and that's FSK.</p>
+
+    <p>FSK is the easiest of the three to picture, because it's just FM with a two-level message. Same modulator, except the signal driving it is a square wave, so the frequency only ever sits at carrier plus the deviation or carrier minus it.</p>
+
+    <p>The payoff is at the receiver. An FM receiver has to reconstruct a waveform, so noise becomes noise in the output. An FSK receiver only answers one question per bit, which of the two frequencies that was closer to, so noise has to be large enough to push a tone past the midpoint before anything breaks.</p>
+
+    <p>ExpressLRS on 2.4 GHz uses two of the SX1280's modes. The fastest packet rates use FLRC, which is frequency shift keying with the transitions smoothed by a Gaussian filter to keep the spectrum tight. The longer-range rates use LoRa, which takes the same idea and spreads it across a sweeping chirp, trading bandwidth for the ability to decode below the noise floor.</p>
+
+    <p>So the thing underneath is FSK, and it's the one worth seeing move:</p>
+
+    <div class="band wide">
+      <div class="rfviz" data-rfviz>
+        <div class="hdr">
+          <span class="ttl">FSK &#183; ROLLING</span>
+          <span class="btns"><button type="button" data-run>pause</button></span>
+        </div>
+        <div class="screen"><canvas></canvas></div>
+        <p class="legend">
+          <span class="k msg"></span>message bits
+          <span class="k car"></span>bare carrier
+          <span class="k mod"></span>transmitted signal
+        </p>
+      </div>
+      <p class="cap">The faint vertical lines are bit boundaries, so all three traces line up. Watch the bottom one against the top: the wave bunches up for a one and stretches out for a zero, and the carrier itself never stops or restarts. Both axes are exaggerated to fit on a screen, since a real link runs on the order of ten thousand carrier cycles per bit and shifts frequency by a tiny fraction of a percent.</p>
+    </div>
+
+    <p>Packing more bits into the same stretch of carrier means more data per second and also a wider slice of spectrum. That trade is the whole reason ExpressLRS offers packet rates from 50 Hz to 1000 Hz: the fast rates cut latency, and the slow ones occupy less bandwidth and survive further out.</p>
+
+    <p>How far apart the two frequencies sit is called the deviation. Too close together and the receiver struggles to tell them apart once there's noise, too far apart and the signal takes up more spectrum than it needs to.</p>
+
+    <p>The Gaussian part of FLRC is about those switching edges. A genuinely instantaneous jump between two frequencies is a discontinuity, and a discontinuity has infinite bandwidth, so it splatters energy into neighbouring channels. Rounding the message off before it reaches the modulator keeps the spectrum where it belongs, which is why the real thing is frequency modulation of a smoothed square wave instead of a hard snap.</p>
+
+    <h2 id="match"><span class="num">04</span>The RF match</h2>
+    <p class="stakes">A matching network has to be lossless. Three decibels of loss is half your transmit power, permanently.</p>
+
+    <p>Between the radio's output pin and the antenna sits a ladder of small inductors and capacitors. Its job is to make the chip, the trace and the antenna all look like 50 Ω to each other, because a wave hitting a junction with the wrong impedance reflects instead of passing through.</p>
+
+    <div class="eq">
+      <math display="block"><mrow><mi>&#915;</mi><mo>=</mo><mfrac><mrow><msub><mi>Z</mi><mi>L</mi></msub><mo>&#8722;</mo><msub><mi>Z</mi><mn>0</mn></msub></mrow><mrow><msub><mi>Z</mi><mi>L</mi></msub><mo>+</mo><msub><mi>Z</mi><mn>0</mn></msub></mrow></mfrac></mrow></math>
+      <span class="note">The reflection coefficient. It goes to zero when the load equals the line, which is the whole point of the ladder.</span>
+    </div>
+
+    <p>That constraint is why there are no resistors anywhere in it. Inductors and capacitors are reactive, so they store energy and hand it back. A resistor converts signal into heat, and any heat in the match is transmit power you paid for and range you don't get.</p>
+
+    <p>The same logic picks the specific parts. The inductors are a wire-wound high-Q series, not the cheaper multilayer kind. An identical nominal 3.0 nH in a cheap part carries far more parasitic resistance, which is real measurable loss. Same number on the bill of materials, worse radio.</p>
+
+    <h3>Copying a solved answer</h3>
+    <p>The values aren't derived here, and that's deliberate. Semtech measured the chip's actual output impedance on their own board with a vector network analyser, did the Smith chart work once, and published the result. Same silicon, same band, same 50 Ω target, so it's the same answer.</p>
+
+    <p>Reproducing it independently would need a VNA and a test board to measure against. At 2.4 GHz a few tenths of a nanohenry visibly rotates the match, so the values get copied exactly and no part gets substituted for something close.</p>
+
+    <details>
+      <summary>The capacitor that doesn't go to ground</summary>
+      <p>Five of the six parts in the ladder do the obvious thing: series inductors in line, shunt capacitors to ground. One doesn't. A 0.5 pF capacitor sits <strong>across</strong> one of the inductors, between its two ends, forming a parallel resonant trap.</p>
+      <div class="eq">
+        <span class="given">0.5 pF across 2.5 nH</span>
+        <math display="block"><mrow><mi>f</mi><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>&#960;</mi><msqrt><mrow><mi>L</mi><mi>C</mi></mrow></msqrt></mrow></mfrac><mo>=</mo><mrow class="res"><mn>4.50</mn><mtext>&#8201;GHz</mtext></mrow></mrow></math>
+        <span class="note">A notch well above the band, which helps the filter reject harmonics.</span>
+      </div>
+      <p>Drawn on a schematic, a shunt capacitor and a parallel one look nearly identical. My own research notes had it recorded as a shunt to ground, and the error was only caught by going back to the reference figure. It's the kind of mistake that produces a board that transmits, badly, for no visible reason.</p>
+    </details>
+
+    <h2 id="layout"><span class="num">05</span>Where the tuning happens</h2>
+    <p>Since the component values are fixed, the only variable left is the copper. The ladder assumes 50 Ω on both sides of it, so if the trace isn't actually 50 Ω the match degrades with perfect parts fitted.</p>
+
+    <p>That sets the stack-up. Four layers, signal over ground over ground over signal, so the RF trace on the top layer has an unbroken plane directly beneath it for its whole length. Trace width then comes out of the fab's impedance calculator for that exact stack, which for a typical 0.2 mm prepreg lands somewhere around 0.4 mm.</p>
+
+    <p>Three rules follow from the same idea:</p>
+    <ol>
+      <li><strong>Nothing crosses under the RF path.</strong> A split or a via antipad in the reference plane forces the return current to detour, and a detour is a discontinuity that reflects and radiates.</li>
+      <li><strong>The match goes in a straight line</strong> with minimal pad-to-pad gaps, series parts in line and shunt parts turning straight down.</li>
+      <li><strong>Every shunt capacitor grounds through a via at its own pad.</strong> A short trace to a shared via is parasitic inductance, and at 2.4 GHz that's enough to detune the match.</li>
+    </ol>
+
+    <h2 id="antennas"><span class="num">06</span>Two antennas</h2>
+    <p>The control link comes out on a u.FL connector for an external pigtail. That moves the antenna off the board entirely, which both shortens the on-board RF run and lets the antenna be positioned and replaced independently of the electronics.</p>
+
+    <p>The ESP's WiFi side gets a printed trace antenna instead, with a π-match in front of it. WiFi here is only used for configuration and firmware updates on the bench, so it never matters in flight and doesn't justify a connector.</p>
+
+    <p>The two are treated differently on purpose. The control link uses Semtech's fixed values because it's the flight-critical path and a proven answer beats improvisation. The WiFi π-match is three footprints with the shunt positions left unpopulated, so it can be tuned later against the actual board if it needs to be. Espressif's own reference marks those values as depending on the antenna, so there's no published answer to copy.</p>
+
+    <h2 id="boot"><span class="num">07</span>Boot and flashing</h2>
+    <p>The ESP samples several pins at reset to decide whether to boot from flash or wait for firmware over serial, so each one needs a defined level before the chip comes out of reset. Three get pull-ups, one gets a pull-down, and the boot pin also goes to a button and to the programming header.</p>
+
+    <p>Two RC networks set the startup order. The datasheet requires the enable line to rise at least 0.1 ms after the reset line, so the two get different capacitors to stagger them. An earlier version of my notes had both at the same value, which left no margin at all.</p>
+
+    <p>There's a 499 Ω resistor in series with the ESP's serial transmit line, which is in Espressif's reference design to suppress harmonics from the edge. A small detail, but it's free and it sits right next to a 2.4 GHz receiver.</p>
+
+    <details>
+      <summary>Getting firmware onto it</summary>
+      <p>Two paths. A six-pin header exposes the ESP's serial lines, the boot pin and the enable pin directly, for a USB-to-serial adapter.</p>
+      <p>The other path is over the flight controller's own USB. Since the ESP's programming UART is the same UART that carries the control protocol to the STM32, the STM32 can bridge that UART to USB and pass firmware straight through, which is how ExpressLRS updates are normally done in the field.</p>
+    </details>
+
+    <div class="pager">
+      <a href="flash.html">&#8592; Blackbox flash</a>
+      <a href="usb.html">USB &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+<script src="../../assets/js/modulation.js"></script>
+</body>
+</html>

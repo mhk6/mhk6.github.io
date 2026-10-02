@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Controller: Power — Mohak Dua</title>
+  <meta name="description" content="The flight controller's power tree: input protection, a 60 V buck to 5 V, and two separate 3.3 V LDOs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='9' y='9' width='14' height='14' rx='2' transform='rotate(45 16 16)' fill='none' stroke='%237d97ff' stroke-width='2.5'/></svg>" />
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <a class="logo" href="../../index.html" aria-label="Home"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="8" width="16" height="16" rx="2" transform="rotate(45 16 16)" fill="currentColor"/></svg></a>
+    <div class="links">
+      <a href="../../experience.html">Experience</a>
+      <a href="../../projects.html" class="active">Projects</a>
+    </div>
+  </nav>
+
+  <nav class="outline" aria-label="Sections">
+    <div class="hd">POWER</div>
+    <ol>
+      <li><a href="#protection">01 Protection</a></li>
+      <li><a href="#buck">02 Buck</a></li>
+      <li><a href="#ldos">03 LDOs</a></li>
+      <li><a href="#sense">04 Battery sense</a></li>
+    </ol>
+  </nav>
+
+  <article class="article">
+    <a class="back" href="../flight-controller.html">&#8592; ELRS Flight Controller</a>
+    <h1>Power</h1>
+    <p class="tech">TPS54360 · AP2114H · AP2112K · SMBJ33CA · DMP6180SK3</p>
+
+    <p class="lead">The board runs off the flight pack, 2S to 6S, so anywhere from 6.6 V to 25.2 V. Everything on it needs one of three rails.</p>
+
+    <ul class="toc">
+      <li><a href="#protection">01 Protection</a></li>
+      <li><a href="#buck">02 Buck</a></li>
+      <li><a href="#ldos">03 LDOs</a></li>
+      <li><a href="#sense">04 Battery sense</a></li>
+    </ul>
+
+    <div class="diagram">
+      <svg viewBox="0 0 700 250" role="img" aria-label="Power tree: battery through protection and a buck converter to a 5 V rail and two 3.3 V regulators.">
+        <text class="hd" x="0" y="12">POWER TREE</text>
+
+        <g>
+          <rect class="bx" x="0" y="100" width="118" height="52" />
+          <rect class="bar" x="0" y="100" width="3" height="52" />
+          <text class="ttl" x="14" y="122">Battery</text>
+          <text class="volt" x="14" y="139">6.6 &#8211; 25.2 V</text>
+        </g>
+        <path class="ln" d="M118 126 H152" />
+        <path class="ln" d="M146 121 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="152" y="100" width="138" height="52" />
+          <rect class="bar" x="152" y="100" width="3" height="52" />
+          <text class="ttl" x="166" y="122">Protection</text>
+          <text class="sub" x="166" y="138">TVS &#183; reverse FET</text>
+        </g>
+        <path class="ln" d="M290 126 H324" />
+        <path class="ln" d="M318 121 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="324" y="100" width="128" height="52" />
+          <rect class="bar" x="324" y="100" width="3" height="52" />
+          <text class="ttl" x="338" y="122">Buck</text>
+          <text class="sub" x="338" y="138">TPS54360</text>
+        </g>
+
+        <path class="ln" d="M452 126 H482 M482 40 V212 M482 40 H512 M482 126 H512 M482 212 H512" />
+        <path class="ln" d="M506 35 l6 5 l-6 5 M506 121 l6 5 l-6 5 M506 207 l6 5 l-6 5" />
+
+        <g>
+          <rect class="bx" x="512" y="14" width="188" height="52" />
+          <rect class="bar" x="512" y="14" width="3" height="52" />
+          <text class="volt" x="526" y="36">5 V</text>
+          <text class="sub" x="526" y="52">LED strip, headers</text>
+        </g>
+        <g>
+          <rect class="bx" x="512" y="100" width="188" height="52" />
+          <rect class="bar" x="512" y="100" width="3" height="52" />
+          <text class="volt" x="526" y="122">3.3 V</text>
+          <text class="sub" x="526" y="138">MCU, flash, radio</text>
+          <text class="sub" x="650" y="122">LDO</text>
+        </g>
+        <g>
+          <rect class="bx" x="512" y="186" width="188" height="52" />
+          <rect class="bar" x="512" y="186" width="3" height="52" />
+          <text class="volt" x="526" y="208">3.3 V analog</text>
+          <text class="sub" x="526" y="224">gyro only</text>
+          <text class="sub" x="650" y="208">LDO</text>
+        </g>
+      </svg>
+    </div>
+
+    <p>Both 3.3 V regulators hang off the 5 V rail rather than the battery. A linear regulator burns the whole difference as heat, so dropping 25 V straight to 3.3 V at 150 mA would be 3.3 W in a small package. From 5 V each one only drops 1.7 V.</p>
+
+    <h2 id="protection"><span class="num">01</span>Protection</h2>
+    <p class="stack">SMBJ33CA · DMP6180SK3 · BZT52C12</p>
+    <p>The order at the input is pad, bulk capacitor, TVS, then the reverse-polarity FET. The FET is last so the TVS and the bulk cap clamp and damp an incoming transient before it reaches the FET.</p>
+
+    <table class="spec">
+      <tr><th>Threat</th><th>Barrier</th></tr>
+      <tr><td>Reversed pack</td><td>P-channel FET, DMP6180SK3</td></tr>
+      <tr><td>Spike on the input</td><td>TVS, plus bulk cap ESR damping</td></tr>
+      <tr><td>Hot-plug inrush</td><td>bulk electrolytic ESR, soft gate RC</td></tr>
+      <tr><td>Gate over-voltage on 6S</td><td>12 V Zener, BZT52C12</td></tr>
+      <tr><td>Brown-out or sag</td><td>buck UVLO divider, STM32 BOR</td></tr>
+      <tr><td>Output short</td><td>IC current limit and thermal shutdown</td></tr>
+    </table>
+
+    <h3>Unidirectional to bidirectional</h3>
+    <p>I first fitted the unidirectional part, which is the normal choice for a rail that never goes negative. That changed once the ESC ribbon became a second battery entry point. The XT30 is keyed and can't be reversed, but the ESC side is a bare 2.54 mm header that can go in backwards or offset by a pin.</p>
+    <p>On a reversed pack a unidirectional TVS forward-conducts at about 0.7 V, which puts a short across the battery. The bidirectional part blocks instead, because 25.2 V is well below its 36.7 V breakdown. Both are the same datasheet row with identical ratings, so the change was one character of the part number.</p>
+
+    <details>
+      <summary>How the TVS was sized, and what the swap doesn't fix</summary>
+      <p>A TVS is picked on three voltages. Standoff has to sit above the highest normal rail or the part conducts on a full pack, breakdown is where it starts conducting hard, and clamping is what the node actually reaches at full surge current. A charged 6S pack is 25.2 V, so 33 V standoff leaves about 7.8 V of clearance.</p>
+      <div class="eq">
+        <span class="given">clamping voltage against every part on the node</span>
+        <math display="block"><mrow><msub><mi>V</mi><mi>C</mi></msub><mo>=</mo><mn>53.3</mn><mtext>&#8201;V</mtext><mo>&lt;</mo><mn>60</mn><mtext>&#8201;V</mtext><mo>&lt;</mo><mn>63</mn><mtext>&#8201;V</mtext><mo>&lt;</mo><mn>65</mn><mtext>&#8201;V</mtext></mrow></math>
+        <math display="block"><mrow><msub><mi>I</mi><mrow><mi>PP</mi></mrow></msub><mo>=</mo><mfrac><mrow><mn>600</mn><mtext>&#8201;W</mtext></mrow><mrow><mn>53.3</mn><mtext>&#8201;V</mtext></mrow></mfrac><mo>=</mo><mrow class="res"><mn>11</mn><mtext>&#8201;A</mtext></mrow></mrow></math>
+        <span class="note">FET 60 V, bulk cap 63 V, buck input 65 V. Surge current on a 10/1000 µs pulse.</span>
+      </div>
+      <p>The bulk electrolytic is still upstream of the FET and still polarized, so a reversed pack can damage it. Moving the bulk cap and TVS downstream of the FET would fix that, but then the FET takes the full hot-plug inrush with no bulk capacitance in front of it, and the TVS no longer clamps spikes at the connector where they arrive.</p>
+    </details>
+
+    <h2 id="buck"><span class="num">02</span>Buck</h2>
+    <p class="stack">TPS54360DDAR · 60 V · 3.5 A · 600 kHz</p>
+    <p>Strip the controller away and a buck is five parts, and the switch is doing all the work. If you didn't care about getting clean DC you could stop there: chop the input on and off at 20 percent duty and the average of those pulses is 20 percent of the input. That's the whole conversion. The problem is that the output isn't 5 V, it's 25 V a fifth of the time and 0 V the rest.</p>
+    <p>So the inductor and the capacitor exist to turn that average into something you can actually use. The inductor resists the change in current so it ramps instead of stepping, the diode gives that current a path when the switch opens, and the capacitor holds the output between pulses. Everything the datasheet asks you to size comes out of that loop.</p>
+
+    <div class="band wide">
+    <div class="sandbox big">
+      <div class="bar">
+        <b>The converter, simulated</b>
+        <span class="sp"></span>
+        <a class="lnk" href="https://www.falstad.com/circuit/circuitjs.html?ctz=DwYwlgTgBAZgvAIgIwKgFwM6KQUwLQAcqYIiAzAEwB0A7AKx0F0AMzdFzALCw6iAEbkAbKgAOghJzKoAbhER1UAW0wL8SFAD4AUFCigoAD2EEoSAJwUoZIabJdU8BMz6JmVVq3OdiMtx+YUKAx5Z1kAE39WFAB6HT1gcKNECgI7LihU0wsKRzdlAHtEcJwYAEMAVwAbNAQ43X0Ad2SEG2zLKE4hTjNLPLD6hOhjSW7eqy6e+x9YfKhQ6kVBppa26wzJ9ZmnF2XgZpGs8cy6IXH+3fiVkaROHpyzJCsci7qr-Zaj6cerade9mQtDS-DLA86zZAiKCNHbKMqGPwIChLd4AJSBHQ47SsyKhTiQUJhKUcoSEnlYcIRChcUHCFTQAE8AMIMkBVHD+CipN4ND4jTYPdjY-7vA6ITbfIVbEW80QtKWC1LSiHSKBKDlhYKkTUQDVIcmeHkJMoYIF3Y4UTjMcFOXLzAoAOyidogBRg+INBtQaAAFikqCjeWKkacLVabfk9lVPmljmsXhCaVUouSCHaSHMwJHRatbFtMrG-omjfoClAcE7kHaMKIUqd+oY7bWwlcEnLETSMNrAwkYgUdMAYuAIDogA&amp;running=false" target="_blank" rel="noopener">open in new tab</a>
+      </div>
+      <div class="howto">
+        <div class="step"><span class="n">1</span><span class="tx">Press <span class="key">RUN / STOP</span><em>top right of the sim</em></span></div>
+        <div class="step"><span class="n">2</span><span class="tx">Watch the voltmeter climb to <b>5 V</b><em>right-hand side of the circuit</em></span></div>
+        <div class="step"><span class="n">3</span><span class="tx">The scope settles flat with a small ripple<em>that ripple is the inductor current, smoothed</em></span></div>
+      </div>
+      <div class="frame">
+        <iframe src="https://www.falstad.com/circuit/circuitjs.html?ctz=DwYwlgTgBAZgvAIgIwKgFwM6KQUwLQAcqYIiAzAEwB0A7AKx0F0AMzdFzALCw6iAEbkAbKgAOghJzKoAbhER1UAW0wL8SFAD4AUFCigoAD2EEoSAJwUoZIabJdU8BMz6JmVVq3OdiMtx+YUKAx5Z1kAE39WFAB6HT1gcKNECgI7LihU0wsKRzdlAHtEcJwYAEMAVwAbNAQ43X0Ad2SEG2zLKE4hTjNLPLD6hOhjSW7eqy6e+x9YfKhQ6kVBppa26wzJ9ZmnF2XgZpGs8cy6IXH+3fiVkaROHpyzJCsci7qr-Zaj6cerade9mQtDS-DLA86zZAiKCNHbKMqGPwIChLd4AJSBHQ47SsyKhTiQUJhKUcoSEnlYcIRChcUHCFTQAE8AMIMkBVHD+CipN4ND4jTYPdjY-7vA6ITbfIVbEW80QtKWC1LSiHSKBKDlhYKkTUQDVIcmeHkJMoYIF3Y4UTjMcFOXLzAoAOyidogBRg+INBtQaAAFikqCjeWKkacLVabfk9lVPmljmsXhCaVUouSCHaSHMwJHRatbFtMrG-omjfoClAcE7kHaMKIUqd+oY7bWwlcEnLETSMNrAwkYgUdMAYuAIDogA&amp;running=false" loading="lazy" title="Falstad simulation of the flight controller buck converter" referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+
+    <p class="cap">Every value matches the board: 25 V in, 8.2 µH, 94 µF, and a 2.5 Ω load standing in for the 2 A the rail actually draws.</p>
+    </div>
+
+    <p>The duty cycle in that sim is 22.8 percent, not the 20 percent the ideal ratio asks for. The difference is the diode. During the off time the inductor doesn't see ground, it sees a diode drop below it, so volt-second balance gives <em>V</em><sub>out</sub> = <em>D</em>(<em>V</em><sub>in</sub> + <em>V</em><sub>d</sub>) &minus; <em>V</em><sub>d</sub>, and the switch has to stay on longer to make up for it. That loss is also why the diode is the part a synchronous converter replaces with a second transistor.</p>
+
+    <p>Sizing against the datasheet's conditions gives 7.3 µH minimum, so 8.2 µH standard. The saturation rule is that the inductor should hold up to at least the IC's switch current limit, so a hard short can't saturate the core before the IC folds back. The Würth part saturates at 5.8 A against a 5.5 A nominal limit, and the 3.9 A full-load peak stays under even the 4.5 A minimum limit.</p>
+
+    <h3>How much it has to deliver</h3>
+    <p>The IC is rated 3.5 A, but the number that matters is the real load. Adding up the worst-case operating current of every chip gives 185 mA of silicon. The external loads are guesses, so they're generous and doubled.</p>
+
+    <div class="eq">
+      <span class="given">LED strip 0.5 A, other 5 V loads 1 A, silicon 0.185 A, with 2&times; margin</span>
+      <math display="block"><mrow><msub><mi>I</mi><mrow><mi>OUT</mi></mrow></msub><mo>=</mo><mo>(</mo><mn>1</mn><mo>+</mo><mn>0.5</mn><mo>+</mo><mn>0.185</mn><mo>)</mo><mo>&#215;</mo><mn>2</mn><mo>=</mo><mrow class="res"><mn>3.37</mn><mtext>&#8201;A</mtext></mrow></mrow></math>
+      <span class="note">Against a 3.5 A rating. It's a sizing ceiling; in flight the 5 V rail draws about 0.7 A.</span>
+    </div>
+
+    <details>
+      <summary>The per-chip current budget</summary>
+      <table class="spec">
+        <tr><th>Consumer</th><th>Rail</th><th>Worst case</th></tr>
+        <tr><td>STM32F405</td><td>3.3 V digital</td><td>119 mA</td></tr>
+        <tr><td>W25Q128 flash</td><td>3.3 V digital</td><td>25 mA</td></tr>
+        <tr><td>SX1280 radio</td><td>3.3 V digital</td><td>24 mA</td></tr>
+        <tr><td>ESP8285</td><td>3.3 V digital</td><td>15 mA</td></tr>
+        <tr><td>ICM-42688-P gyro</td><td>3.3 V analog</td><td>1 mA</td></tr>
+        <tr><td>DPS310 barometer</td><td>3.3 V digital</td><td>1 mA</td></tr>
+        <tr><td>Subtotal</td><td></td><td>185 mA</td></tr>
+      </table>
+      <p>Each one is the worst-case operating figure from its datasheet, taking the larger side of anything half-duplex. The ESP8285 draws 197 mA on a WiFi transmit burst, but in flight the link runs on the SX1280 and the ESP sits in modem sleep. WiFi only runs during configuration and firmware updates, so it never stacks with the flight loads. The buck has to tolerate the burst rather than be sized for it.</p>
+    </details>
+
+    <details>
+      <summary>Switching frequency, turn-on threshold and output capacitors</summary>
+      <p>One resistor on the RT pin sets the frequency.</p>
+      <div class="eq">
+        <math display="block"><mrow><msub><mi>R</mi><mi>T</mi></msub><mo>=</mo><mfrac><mn>101756</mn><msup><msub><mi>f</mi><mrow><mi>SW</mi></mrow></msub><mn>1.008</mn></msup></mfrac><mo>=</mo><mn>161</mn><mtext>&#8201;k&#937;</mtext></mrow></math>
+        <span class="note">R in kΩ, f in kHz, at 600 kHz. Fitted 162 kΩ 1%.</span>
+      </div>
+      <p>The turn-on divider can't be copied from the datasheet. TI's values turn on at 8 V, which would never start on a 2S pack. Turn-on needs to sit just above the buck's own dropout so the rail holds as the battery sags instead of cycling on and off in flight.</p>
+      <div class="eq">
+        <span class="given">dropout floor for 5 V out is 5.56 V, so target 6.4 V on and 5.9 V off</span>
+        <math display="block"><mrow><msub><mi>R</mi><mrow><mi>UV1</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>V</mi><mrow><mi>start</mi></mrow></msub><mo>&#8722;</mo><msub><mi>V</mi><mrow><mi>stop</mi></mrow></msub></mrow><msub><mi>I</mi><mrow><mi>HYS</mi></mrow></msub></mfrac><mo>=</mo><mn>147</mn><mtext>&#8201;k&#937;</mtext></mrow></math>
+        <span class="note">Fitted 150 kΩ and 33.2 kΩ, which back-substitute to <span class="res">6.44 V on, 5.93 V off</span>, about 0.5 V of hysteresis above the floor.</span>
+      </div>
+      <p>For the output capacitors three criteria apply and the largest wins. Transient response needs 29.2 µF, overshoot on load release needs 24.6 µF, and ripple needs only 7.8 µF with ESR under 27 mΩ.</p>
+      <div class="eq">
+        <math display="block"><mrow><msub><mi>C</mi><mrow><mi>OUT</mi></mrow></msub><mo>&gt;</mo><mfrac><mrow><mn>2</mn><mi>&#916;</mi><msub><mi>I</mi><mrow><mi>step</mi></mrow></msub></mrow><mrow><msub><mi>f</mi><mrow><mi>SW</mi></mrow></msub><mi>&#916;</mi><mi>V</mi></mrow></mfrac><mo>=</mo><mrow class="res"><mn>29.2</mn><mtext>&#8201;µF</mtext></mrow></mrow></math>
+        <span class="note">A 1.75 A step within 0.2 V of droop. Fitted 2 &times; 47 µF 10 V X7R, about 58 µF after DC bias derating.</span>
+      </div>
+    </details>
+
+    <h2 id="ldos"><span class="num">03</span>LDOs</h2>
+    <p class="stack">AP2114H-3.3 · AP2112K-3.3</p>
+    <p>The digital rail feeds the MCU, flash, radio and receiver, and has to absorb the ESP's WiFi burst, so it's the 1 A part. The analog rail feeds the gyro and nothing else.</p>
+    <p>The ICM-42688-P senses Coriolis force as a small capacitance change and amplifies it heavily, so supply noise couples into the measurement and Betaflight's PID loop turns that into motor jitter. Betaflight specifies a dedicated LDO for this part, with output noise under 50 µV peak to peak and rejection above 70 dB down to around 1 Hz.</p>
+
+    <details>
+      <summary>Why a regulator beats the buck here</summary>
+      <p>A buck can't meet that, because its output is a filtered switching waveform and keeps some ripple at 600 kHz and its harmonics. An LDO has no switch. It's a linear pass element whose feedback loop rejects input ripple, so it takes the buck's 5 V and attenuates the ripple by its rejection ratio while adding only its own noise floor.</p>
+      <div class="eq">
+        <math display="block"><mrow><msub><mi>v</mi><mrow><mi>gyro</mi></mrow></msub><mo>&#8776;</mo><msub><mi>v</mi><mrow><mi>ripple</mi></mrow></msub><mo>&#215;</mo><msup><mn>10</mn><mrow><mo>&#8722;</mo><mi>PSRR</mi><mo>/</mo><mn>20</mn></mrow></msup></mrow></math>
+        <span class="note">Ripple on the 5 V rail, attenuated by the LDO's rejection.</span>
+      </div>
+    </details>
+
+    <h2 id="sense"><span class="num">04</span>Battery sense</h2>
+    <p>A divider scales the pack down into the ADC range, with a small capacitor filtering switching noise. Betaflight uses the reading for the OSD, the low-voltage warning, cell-count detection, sag compensation and the capacity estimate.</p>
+    <p>It started at 10 k over 1 k, dividing by 11, which puts a full 6S pack at 2.29 V. That was wrong:</p>
+    <ol>
+      <li><strong>It was checked against 36 V.</strong> That's the TVS breakdown voltage, not the voltage the node reaches.</li>
+      <li><strong>The clamping voltage is 53.3 V.</strong> Divided by 11, that's 4.85 V at the pin.</li>
+      <li><strong>The pin's absolute maximum is 4.0 V.</strong> The surge the TVS exists to survive would have gone into the ADC.</li>
+      <li><strong>No clamp diode covers it.</strong> PC2 is a five-volt-tolerant pin, and those omit the upper diode to VDD. The tolerance also doesn't apply in analog mode, which is how the pin is used.</li>
+    </ol>
+    <p>The divider is now 18 k over 1 k, dividing by 19. A full 6S pack reads 1.33 V and the 53.3 V clamp lands at 2.81 V, under the 4.0 V limit.</p>
+
+    <div class="pager">
+      <a href="../flight-controller.html">&#8592; Flight Controller</a>
+      <a href="mcu.html">MCU &#8594;</a>
+    </div>
+  </article>
+
+  <footer class="foot">
+    <a href="https://github.com/mhk6">GitHub</a>
+    <a href="https://www.linkedin.com/in/mohakd">LinkedIn</a>
+    <a href="mailto:dua00013@umn.edu">Email</a>
+    <span class="copy">© <span data-year>2026</span> Mohak Dua</span>
+  </footer>
+
+</div>
+<script src="../../assets/js/main.js"></script>
+<script src="../../assets/js/outline.js"></script>
+</body>
+</html>
